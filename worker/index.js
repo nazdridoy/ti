@@ -2,7 +2,11 @@
 var authConfig = {
   siteName: "Glory to Heaven",
   hybridpass: "Copy Hybrid Password Generated from Backend",
-  version: "v8.0.8",
+  version: "v8.1.3",
+  theme: "green",
+  //Following Themes are Available for Selection.
+  //carnation, curious-blue, emerald, ice-cold, konifer, netflix-red, kournikova, mona-lisa, persian-rose, purple-heart, purple-mountains-majesty, salmon, selective-yellow, shamrock, witch-haze
+  //All are Case Sensitive.
   frontendUrl: "https://glorytoheaven.tk",
   github_name: "tks18",
   github_repo: "gindex-v4",
@@ -34,10 +38,6 @@ var themeOptions = {
     default_poster: "https://i.ibb.co/Hx3ZqLm/giphy.gif",
   },
   footer_data: {
-    copyright: true,
-    disclaimer: true,
-    license: true,
-    codeofconduct: true,
     footer_logo: true,
     footer_logo_link: "https://i.ibb.co/Hx3ZqLm/giphy.gif",
   },
@@ -49,177 +49,13 @@ var themeOptions = {
     desc: true,
   }
 }
-var mainhero = [
-  {
-    root: 0,
-    link: [
-      {
-        name: "The 100",
-        poster: "https://wallpapercave.com/wp/wp1825213.jpg",
-        subtitle: "Fear isnt their only weapon.",
-        link: "Series/The%20100",
-      },
-      {
-        name: "Orange is the New Black",
-        poster: "https://ejournalz.com/wp-content/uploads/2019/09/orange-is-the-new-black-season-6-shows-background-01.jpg",
-        subtitle: "Every sentence is a story",
-        link: "Orange%20is%20the%20new%20black",
-      },
-      {
-        name: "Peaky Blinders",
-        poster: "https://images.squarespace-cdn.com/content/v1/5b3a1b92da02bc79ba013a60/1533301640630-YABFHIHFZWXYUJ6U9D4V/ke17ZwdGBToddI8pDm48kF9aEDQaTpZHfWEO2zppK7Z7gQa3H78H3Y0txjaiv_0fDoOvxcdMmMKkDsyUqMSsMWxHk725yiiHCCLfrh8O1z5QPOohDIaIeljMHgDF5CVlOqpeNLcJ80NK65_fV7S1UX7HUUwySjcPdRBGehEKrDf5zebfiuf9u6oCHzr2lsfYZD7bBzAwq_2wCJyqgJebgg/PeakyBlinders-0312+1.jpg",
-        subtitle: "Crime pays well",
-        link: "Series/Peaky%20Blinders",
-      },
-    ],
-  },
-];
-var categories = [
-  {
-    root: 0,
-    link: [
-      {
-        name: "Anime",
-        link: "Anime",
-        poster: "https://jw-webmagazine.com/wp-content/uploads/2020/03/Kimetsu-no-YaibaDemon-Slayer.jpg"
-      },
-      {
-        name: "Music",
-        link: "Music",
-        poster: "https://i1.wp.com/sova.ponominalu.ru/wp-content/uploads/2019/09/diplo.jpg?fit=1000%2C631&ssl=1"
-      },
-      {
-        name: "The Cinema",
-        link: "Movies",
-        poster: "https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcS-5gU6lKVeKvdBBVQyn8aZY4kRtPBgJPIpDA&usqp=CAU"
-      },
-      {
-        name: "TV Series",
-        link: "Series",
-        poster: "https://www.arthipo.com/image/cache/catalog/genel-tasarim/all-posters/dizi-tv-series-posterleri/PSTER-dizi168k-breaking_bad_actors_face_walter_white_jesse_pinkman-1000x1000.jpg"
-      },
-      {
-        name: "Documentaries",
-        link: "Documentaries%20🎟%EF%B8%8F",
-        poster: "https://www.un.org/sites/un2.un.org/files/styles/large-article-image-style-16-9/public/field/image/virunga-poster_0.jpg?itok=sJdai-fJ"
-      },
-      {
-        name: "Cartoons",
-        link: "Cartoons%20😚",
-        poster: "https://ae01.alicdn.com/kf/HTB119BtJpXXXXauXVXXq6xXFXXXE/household-items-stickers-cartoon-animation-Avengers-superhero-Poster-20-X30-Inch-Wall-Sticker-Poster-Wallpaper-Free.jpg"
-      },
-    ],
-  },
-];
-var trendingPosters = [
-  {
-    root: 0,
-    link: [
-      {
-        poster: "https://images.newindianexpress.com/uploads/user/imagelibrary/2020/4/28/w900X450/Paatal_Lok.jpg",
-        link: "Hindi%20Series/Paatal%20Lok/Paatal%20Lok%202020%20S01%20Hindi%20720p%20AMZN%20WEBRip%20x264%20AAC%205.1%20MSubs%20-%20LOKiHD%20-%20Telly",
-      },
-      {
-        poster: "https://akm-img-a-in.tosshub.com/indiatoday/images/story/202006/qc_12-770x433.jpeg?hivJTisfzeBoAqGHnSq1nWZQCeNp_ErN",
-        link: "Uploads%20from%20Client%20-%20to%20be%20Organised/TamilRockers.com%20-%20Dark%20Season%201%20(2017)%20German%20480p%20HDRip%20x264%20ESubs%201.9GB",
-      },
-      {
-        poster: "https://cdn.shopify.com/s/files/1/0969/9128/products/Friends_tv_show_poster_-_A3_-_11x15.8_5da52b1c-6c02-4649-abee-b41bf475e692.jpg?v=1561202385",
-        link: "Series/F.R.I.E.N.D.S",
-      },
-      {
-        poster: "https://static-koimoi.akamaized.net/wp-content/new-galleries/2020/04/money-heist-season-4-la-casa-de-papel-makers-revealed-a-big-spoiler-in-their-poster-earlier-no-one-noticed-it-0001.jpg",
-        link: "Series/Money%20Heist",
-      },
-      {
-        poster: "https://cdn.vox-cdn.com/thumbor/1FsuIbsA0gKrplbv7m6BQKA4_UM=/0x683:810x1139/1600x900/cdn.vox-cdn.com/uploads/chorus_image/image/55660155/strangerthings.0.jpg",
-        link: "Series/Stranger%20Things",
-      },
-      {
-        poster: "https://cdn.shopify.com/s/files/1/0969/9128/products/91TmR1v-qRL._RI_2f56fbdc-a4e4-4fa8-b022-b45e36874fc7.jpg?v=1556951536",
-        link: "Series/The%20Office",
-      },
-    ],
-  },
-];
-var quickLinks = [
-  {
-    root: 0,
-    link: [
-      {
-        displayname: "Anime",
-        link: "Anime",
-        faIcon: "fas fa-heart",
-      },
-      {
-        displayname: "Movies",
-        link: "Movies",
-        faIcon: "fas fa-video",
-      },
-      {
-        displayname: "TV Series",
-        link: "Series",
-        faIcon: "fas fa-tv",
-      },
-      {
-        displayname: "Courses",
-        link: "Courses",
-        faIcon: "fas fa-glasses",
-      },
-      {
-        displayname: "Music",
-        link: "Music",
-        faIcon: "fas fa-play",
-      },
-    ],
-  },
-];
-var routes = {
-  checkEmail: authConfig.backendSite + '/checkmail',
-  loginRoute: authConfig.backendSite + '/login',
-  registerRoute: authConfig.backendSite + '/register/user',
-  otpRegister: authConfig.backendSite + '/register/approve/otp',
-  requestRoute: authConfig.backendSite + '/request/user',
-  verifyRoute: authConfig.backendSite + '/user/verify',
-  changePasswordRoute: authConfig.backendSite + '/user/changepassword',
-  requestadminroute: authConfig.backendSite + '/request/admin',
-  requestsuperadminroute: authConfig.backendSite + '/request/superadmin',
-  getPendingUsers: authConfig.backendSite + '/get/pending/users',
-  getPendingAdmins: authConfig.backendSite + '/get/pending/admins',
-  getPendingSuperAdmins: authConfig.backendSite + '/get/pending/superadmins',
-  deletePendingUsers: authConfig.backendSite + '/request/remove/user',
-  deletePendingAdmins: authConfig.backendSite + '/request/remove/admin',
-  deletePendingSuperAdmins: authConfig.backendSite + '/request/remove/superadmin',
-  upgradeAdmin: authConfig.backendSite + '/register/approve/admin',
-  upgradeSuperAdmin: authConfig.backendSite + '/register/approve/superadmin',
-  inviteUser: authConfig.backendSite + '/invite/user',
-  inviteAdmin: authConfig.backendSite + '/invite/admin',
-  inviteSuperAdmin: authConfig.backendSite + '/invite/superadmin',
-  addSpamUser: authConfig.backendSite + '/spam/user',
-  addSpamAdmin: authConfig.backendSite + '/spam/admin',
-  addSpamSuperAdmin: authConfig.backendSite + '/spam/superadmin',
-  removeSpamUser: authConfig.backendSite + '/spam/remove/user',
-  removeSpamAdmin: authConfig.backendSite + '/spam/remove/admin',
-  removeSpamSuperadmin: authConfig.backendSite + '/spam/remove/superadmin',
-  getSpamUsers: authConfig.backendSite + '/get/spam/users',
-  getSpamAdmins: authConfig.backendSite + '/get/spam/admins',
-  getSpamSuperadmins: authConfig.backendSite + '/get/spam/superadmins',
-  quickaddSpam: authConfig.backendSite + '/spam/quickadd',
-  deleteUser: authConfig.backendSite + '/delete/user',
-  deleteMe: authConfig.backendSite + '/user/delete',
-  deleteAdmin: authConfig.backendSite + '/delete/admin',
-  mediaTokenTransmitter: authConfig.backendSite + '/user/media/transmit',
-  mediaTokenVerify: authConfig.backendSite + '/user/media/verify',
-  forgotPass: authConfig.backendSite + '/user/forgotpass',
-  getUsers: authConfig.backendSite + '/get/users',
-  getAll: authConfig.backendSite + '/get/all',
-  getAdmins: authConfig.backendSite + '/get/admins',
-  getSuperAdmins: authConfig.backendSite + '/get/superadmins',
-  setSiteSettings: authConfig.backendSite + '/user/sitesettings',
-  getSiteSettings: authConfig.backendSite + '/get/sitesettings'
-};
 // =======Options END=======
 
+
+var routes = {
+  loginRoute: authConfig.backendSite + '/login',
+  mediaTokenVerify: authConfig.backendSite + '/media/verify',
+};
 
 /**
  * global functions
@@ -263,7 +99,7 @@ function html(current_drive_order = 0, model = {}) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0, user-scalable=no"/>
   <title>${authConfig.siteName}</title>
   <style>
-    @import url(https://cdn.jsdelivr.net/gh/${authConfig.github_name}/${authConfig.github_repo}@${authConfig.version}/vuejs/dist/style.css);
+    @import url(https://cdn.jsdelivr.net/gh/${authConfig.github_name}/${authConfig.github_repo}@${authConfig.version}/vuejs/outputs/${authConfig.theme}/style.css);
   </style>
   <link rel="icon" sizes="57x57" href="${authConfig.favicon}" />
   <script>
@@ -271,44 +107,9 @@ function html(current_drive_order = 0, model = {}) {
       version: authConfig.version,
       themeOptions: themeOptions,
     })}');
-    window.quickLinks = JSON.parse('${JSON.stringify(
-      quickLinks.map((it) => {
-        var links = {
-          root: it.root,
-          link: it.link
-        }
-        return links;
-      })
-    )}');
-    window.mainHeroLinks = JSON.parse(
-      '${JSON.stringify(mainhero.map((hero) => {
-        const heroData = {
-          root: hero.root,
-          link: hero.link
-        }
-        return heroData;
-      }))}'
-    );
-    window.trendingPosterLinks = JSON.parse(
-      '${JSON.stringify(trendingPosters.map((poster) => {
-        const posterData = {
-          root: poster.root,
-          link: poster.link
-        }
-        return posterData;
-      }))}'
-    );
-    window.homeCategories = JSON.parse(
-      '${JSON.stringify(categories.map((category) => {
-        const categoryData = {
-          root: category.root,
-          link: category.link
-        }
-        return categoryData;
-      }))}'
-    );
-    window.apiRoutes = JSON.parse('${JSON.stringify(routes)}');
     window.themeOptions = JSON.parse('${JSON.stringify(themeOptions)}');
+    window.backend = '${authConfig.backendSite}';
+    window.version = '${authConfig.version}';
     window.gds = JSON.parse('${JSON.stringify(
       authConfig.roots.map((it) => it.name)
     )}');
@@ -319,7 +120,7 @@ function html(current_drive_order = 0, model = {}) {
 </head>
 <body>
     <div id="app"></div>
-    <script src="https://cdn.jsdelivr.net/gh/${authConfig.github_name}/${authConfig.github_repo}@${authConfig.version}/vuejs/dist/app.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/${authConfig.github_name}/${authConfig.github_repo}@${authConfig.version}/vuejs/outputs/${authConfig.theme}/app.js"></script>
 </body>
 </html>
 `;

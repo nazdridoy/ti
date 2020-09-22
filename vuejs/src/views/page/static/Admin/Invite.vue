@@ -6,7 +6,6 @@
       <div class="columns is-multiline is-centered is-vcentered">
         <div class="column has-text-centered is-half">
           <h2 class="title has-text-weight-bold has-text-white">Invite Users</h2>
-          <p class="subtitle is-small has-text-white">(Please Use Considerably As We Have to Incur Mail Costs.)</p>
           <article :class=" errorMessage ? 'message is-danger' : 'message is-hidden is-danger'">
             <div class="message-header">
               <p>Error Proccessing</p>
@@ -82,7 +81,7 @@
                 </div>
               </div>
             </div>
-            <button :class=" loading ? 'button is-loading is-rounded is-success is-medium' : 'button is-success is-rounded is-medium' " type="submit" :disabled="buttondisabled" >
+            <button :class=" loading ? 'button is-loading is-rounded is-netflix-red is-medium' : 'button is-netflix-red is-rounded is-medium' " type="submit" :disabled="buttondisabled" >
               <span class="icon">
                 <i class="fas fa-user-plus"></i>
               </span>
@@ -98,6 +97,7 @@ import {
   initializeUser,
   getgds,
 } from "@utils/localUtils";
+import { apiRoutes, backendHeaders } from "@/utils/backendUtils";
 import Loading from 'vue-loading-overlay';
 import 'vue-loading-overlay/dist/vue-loading.css';
 export default {
@@ -147,12 +147,12 @@ export default {
           this.loading = true;
             e.preventDefault()
             if(this.checked && this.codechecked && this.name.length > 0 && this.email.length > 0 && this.message.length > 0){
-              this.$http.post(this.apiurl, {
+              this.$backend.post(this.apiurl, {
                     name: this.name,
                     email: this.email,
                     message: this.message,
                     adminuseremail: this.user.email,
-              })
+              }, backendHeaders(this.token.token))
               .then(response => {
                   if(response){
                     if(response.data.auth && response.data.registered){
@@ -160,14 +160,12 @@ export default {
                       this.successMessage = true;
                       this.errorMessage = false;
                       this.metatitle = "Invite Sent...";
-                      this.$ga.event({eventCategory: "Invite",eventAction: "Success"+" - "+this.siteName,eventLabel: "Invite"})
                       this.resultmessage = response.data.message
                     } else {
                       this.loading = false;
                       this.successMessage = false;
                       this.errorMessage = true;
                       this.metatitle = "Invite Failed...";
-                      this.$ga.event({eventCategory: "Invite",eventAction: "Failed"+" - "+this.siteName,eventLabel: "Invite"})
                       this.resultmessage = response.data.message
                     }
                   }
@@ -216,12 +214,10 @@ export default {
       var userData = initializeUser();
       if(userData.isThere){
         if(userData.type == "hybrid"){
-          this.$ga.event({eventCategory: "User Initialized",eventAction: "Hybrid - "+this.siteName,eventLabel: "Invite",nonInteraction: true})
           this.user = userData.data.user;
           this.logged = userData.data.logged;
           this.loading = userData.data.loading;
         } else if(userData.type == "normal"){
-          this.$ga.event({eventCategory: "User Initialized",eventAction: "Normal - "+this.siteName,eventLabel: "Invite",nonInteraction: true})
           this.user = userData.data.user;
           this.token = userData.data.token;
           this.logged = userData.data.logged;
@@ -237,10 +233,10 @@ export default {
     mounted(){
       this.loading = true;
       if(this.user.admin && this.user.superadmin){
-        this.apiurl = window.apiRoutes.inviteUser;
+        this.apiurl = apiRoutes.inviteUser;
         this.admin = true, this.superadmin = true, this.role = 'user', this.disabled = false, this.loading = false;
       } else if(this.user.admin && !this.user.superadmin) {
-        this.apiurl = window.apiRoutes.inviteUser;
+        this.apiurl = apiRoutes.inviteUser;
         this.admin = true, this.superadmin = false, this.role = 'user', this.disabled = true, this.loading = false;
       } else {
         this.loading = false;
@@ -251,23 +247,18 @@ export default {
       let gddata = getgds(this.$route.params.id);
       this.gds = gddata.gds;
       this.currgd = gddata.current;
-      this.$ga.page({
-        page: this.$route.path,
-        title: "Invite"+" - "+this.siteName,
-        location: window.location.href
-      });
     },
     watch: {
       role: function() {
         if(this.role == "user"){
-          this.apiurl = window.apiRoutes.inviteUser;
+          this.apiurl = apiRoutes.inviteUser;
           this.validateData();
         } else if(this.role == "admin"){
-          this.apiurl = window.apiRoutes.inviteAdmin;
+          this.apiurl = apiRoutes.inviteAdmin;
           this.validateData();
         } else if(this.role == "superadmin"){
           this.validateData();
-          this.apiurl = window.apiRoutes.inviteSuperAdmin;
+          this.apiurl = apiRoutes.inviteSuperAdmin;
         }
       },
       name: "validateData",

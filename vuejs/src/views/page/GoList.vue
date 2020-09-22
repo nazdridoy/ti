@@ -1,13 +1,17 @@
 <template>
   <div :class="ismobile ? 'mt-2' : 'ml-5 mt-2 mr-5 pl-5 pr-5' ">
+    <div class="loading">
+      <loading :active.sync="mainLoad" :can-cancel="false" :is-full-page="fullpage"></loading>
+    </div>
     <div class="golist" v-loading="loading">
       <bread-crumb ref="breadcrumb"></bread-crumb>
       <list-view
         :data="files"
+        :originalData="files"
         v-if="mode === 'list'"
         :icons="getIcon"
+        :sortIt="sortIt"
         :action="action"
-        :copy="copy"
       />
       <grid-view
         class="g2-content"
@@ -40,6 +44,23 @@
     ></div>
     <headmd :option="headmd" v-if="renderHeadMD && headmd.display"></headmd>
     <readmemd :option="readmemd" v-if="renderReadMeMD && readmemd.display"></readmemd>
+    <viewer
+      v-if="viewer && images && images.length > 0"
+      :images="images"
+      class="is-hidden"
+      ref="viewer"
+      :options="{ toolbar: true, url: 'data-source' }"
+      @inited="inited"
+    >
+      <img
+        v-for="image in images"
+        :src="thum(image.thumbnailLink)"
+        :data-source="image.path+'?player=internal'+'&email='+user.email+'&token='+token.token"
+        :key="image.path"
+        :alt="image.name"
+        class="image"
+      />
+    </viewer>
   </div>
 </template>
 
@@ -50,8 +71,12 @@ import {
   checkoutPath,
   checkView,
 } from "@utils/AcrouUtil";
-import { getgds, icon } from "@utils/localUtils";
+import { orderBy, sortBy } from "lodash";
+import { initializeUser, getgds, icon } from "@utils/localUtils";
 import { mapState } from "vuex";
+import Loading from 'vue-loading-overlay';
+import notify from "@/components/notification";
+import { apiRoutes, backendHeaders } from "@utils/backendUtils";
 import BreadCrumb from "../common/BreadCrumb";
 import ListView from "./components/list";
 import GridView from "./components/grid";
@@ -66,6 +91,7 @@ export default {
     Headmd: Markdown,
     Readmemd: Markdown,
     InfiniteLoading,
+    Loading
   },
   metaInfo() {
     return {
@@ -90,12 +116,22 @@ export default {
       loadImage: "",
       currentLocation: "",
       gds: [],
+      user: {},
+      token: {},
       currgd: {},
+      sort: {
+        name: true,
+        modifiedTime: true,
+        absoluteSize: true,
+      },
       page: {
         page_token: null,
         page_index: 0,
       },
       files: [],
+      mainLoad: false,
+      fullpage: true,
+      viewer: false,
       readmeLink: "",
       headLink: "",
       headmd: { display: false, file: {}, path: "" },
@@ -126,7 +162,7 @@ export default {
     images() {
       return this.files.filter(
         (file) => file.mimeType.indexOf("image") != -1
-      );
+      )
     },
     siteName() {
       return window.gds.filter((item, index) => {
@@ -141,15 +177,11 @@ export default {
     },
   },
   created() {
+    this.initializeUser();
     this.render();
     let gddata = getgds(this.$route.params.id);
     this.gds = gddata.gds;
     this.currgd = gddata.current;
-    this.$ga.page({
-      page: this.$route.path,
-      title: this.$route.name+" - "+this.siteName,
-      location: window.location.href
-    });
   },
   methods: {
     infiniteHandler($state) {
@@ -216,7 +248,7 @@ export default {
       var path = this.$route.path;
       return !files
         ? []
-        : files
+        : sortBy(orderBy(files
             .map((item) => {
               var p = path + checkoutPath(item.name, item);
               let isFolder =
@@ -227,15 +259,13 @@ export default {
                 ...item,
                 modifiedTime: formatDate(item.modifiedTime),
                 size: size,
+                absoluteSize: item.size,
                 isFolder: isFolder,
               };
-            })
-            .sort((a, b) => {
-              if (a.isFolder && b.isFolder) {
-                return 0;
-              }
-              return a.isFolder ? -1 : 1;
-            });
+            }), ['file'], ['asc']),
+            [function(q){
+              return !q.isFolder;
+            }]);
     },
     checkPassword(path) {
       var pass = prompt(this.$t("list.auth"), "");
@@ -246,24 +276,6 @@ export default {
         this.$router.go(-1);
       }
     },
-    copy(path) {
-      let origin = window.location.origin;
-      path = origin + encodeURI(path);
-      this.$copyText(path)
-        .then(() => {
-          this.$notify({
-            title: this.$t("notify.title"),
-            message: this.$t("copy.success"),
-            type: "success",
-          });
-        })
-        .catch(() => {
-          this.$notify.error({
-            title: this.$t("notify.title"),
-            message: this.$t("copy.error"),
-          });
-        });
-    },
     checkMobile() {
       var width = this.windowWidth > 0 ? this.windowWidth : this.screenWidth;
       if(width > 966){
@@ -272,25 +284,125 @@ export default {
         this.ismobile = true
       }
     },
+    async initializeUser() {
+      var userData = await initializeUser();
+      if(userData.isThere){
+        if(userData.type == "hybrid"){
+          this.user = userData.data.user;
+        } else if(userData.type == "normal"){
+          this.user = userData.data.user;
+          this.token = userData.data.token;
+        }
+      } else {
+        this.logged = userData.data.logged;
+      }
+    },
     thum(url) {
       return url ? `/${this.$route.params.id}:view?url=${url}` : "";
     },
+    inited(viewer) {
+      this.$viewer = viewer;
+    },
     action(file, target) {
-      this.$ga.event({eventCategory: "File Navigation",eventAction: file.name+" - "+this.siteName,eventLabel: "Files",nonInteraction: true})
       let cmd = this.$route.params.cmd;
+      if (file.mimeType === "application/vnd.google-apps.shortcut") {
+        this.$notify({
+          title: "notify.title",
+          message: "error.shortcut_not_down",
+          type: "warning",
+        });
+        return;
+      }
       if (cmd && cmd === "search") {
         this.goSearchResult(file, target);
         return;
       }
+      if (file.mimeType.startsWith("image/") && target === "view") {
+       this.viewer = true;
+       this.$nextTick(() => {
+         let index = this.images.findIndex((item) => item.path === file.path);
+         this.$viewer.view(index);
+       });
+       return;
+     }
       this.target(file, target);
     },
     target(file, target) {
       let path = file.path;
-      if (target === "view") {
-        this.$router.push({
-          path: checkView(path),
-        });
-        return;
+      if (target === "_blank") {
+        if(file.mimeType == 'application/vnd.google-apps.folder'){
+          window.open(window.location.origin+path);
+          return;
+        } else {
+          window.open(window.location.origin+checkView(path));
+          return;
+        }
+      }
+      if (target === "down") {
+        this.$notify({
+          title: "Downloading Now",
+          message: "Generating Links and Downloading",
+          type: "success",
+        })
+        this.mainLoad = true;
+        this.$backend.post(apiRoutes.mediaTokenTransmitter, {
+          email: this.user.email,
+          token: this.token.token,
+        }, backendHeaders(this.token.token)).then(response => {
+          if(response.data.auth && response.data.registered && response.data.token){
+            let link = window.location.origin+encodeURI(path.replace(/^\/(\d+:)\//, "/$1down/"))+"?player=download"+"&email="+this.user.email+"&token="+response.data.token;
+            this.mainLoad = false;
+            location.href=link;
+            return;
+          } else {
+            this.mainLoad = false;
+            return;
+          }
+        }).catch(e => {
+          console.log(e);
+          this.mainLoad = false;
+          return;
+        })
+      }
+      if (target === "copy") {
+        this.$notify({
+          title: "Processing",
+          message: "Generating Links",
+          type: "info",
+        })
+        this.mainLoad = true;
+        this.$backend.post(apiRoutes.mediaTokenTransmitter, {
+          email: this.user.email,
+          token: this.token.token,
+        }, backendHeaders(this.token.token)).then(response => {
+          if(response.data.auth && response.data.registered && response.data.token){
+            let link = window.location.origin+encodeURI(path)+"?player=external"+"&email="+this.user.email+"&token="+response.data.token;
+            this.mainLoad = false;
+            navigator.clipboard.writeText(link).then(function() {
+              notify({
+                title: "Copied !!",
+                message: "Successfully Copied.",
+                type: "success",
+              })
+              return;
+            }, function(err) {
+              notify({
+                title: "Failed",
+                message: "Failed to Copied - "+err,
+                type: "error",
+              })
+              return;
+            });
+            return;
+          } else {
+            this.mainLoad = false;
+            return;
+          }
+        }).catch(e => {
+          console.log(e);
+          this.mainLoad = false;
+          return;
+        })
       }
       if (file.mimeType === "application/vnd.google-apps.folder") {
         this.$router.push({
@@ -298,6 +410,13 @@ export default {
         });
         return;
       }
+      if (target === "view") {
+        this.$router.push({
+          path: checkView(path),
+        });
+        return;
+      }
+
     },
     renderMd() {
       var cmd = this.$route.params.cmd;
@@ -319,6 +438,18 @@ export default {
           path: this.readmeLink,
         };
       }
+    },
+    sortIt(name){
+      this.sort[name] = !this.sort[name];
+      this.files = sortBy(
+        orderBy(
+          this.files,
+          [name],
+          [this.sort[name] ? 'asc' : 'desc']
+        ),
+        [function(q){
+        return !q.isFolder;
+      }])
     },
     goSearchResult(file, target) {
       this.loading = true;

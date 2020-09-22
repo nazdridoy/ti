@@ -17,7 +17,7 @@
               </p>
             </div>
             <div class="column has-text-centered is-3">
-              <button @click="handleRefresh" :class=" loading ? 'button is-rounded is-loading is-warning' : 'button is-rounded is-warning'">
+              <button @click="handleRefresh" :class=" loading ? 'button is-rounded is-loading is-netflix-red' : 'button is-rounded is-netflix-red'">
                 <span class="icon">
                   <i class="fas fa-sync"></i>
                 </span>
@@ -69,28 +69,28 @@
                     </div>
                   </article>
                 </div>
-                <div v-show="!inviteInput && !deleteInput" :class="admin && superadmin ? currentUser.admin && currentUser.superadmin && !currentUser.pending ? 'column has-text-centered is-half' : 'column has-text-right is-quarter' : 'column has-text-centered is-half' ">
-                  <button class="button is-rounded is-danger" @click="deleteInput = true;">
+                <div v-show="!inviteInput" :class="admin && superadmin ? currentUser.admin && currentUser.superadmin && !currentUser.pending ? 'column has-text-centered is-half' : 'column has-text-right is-quarter' : 'column has-text-centered is-half' ">
+                  <button class="button is-rounded is-netflix-red" @click="handleUpgradeDelete(currentUser, 'delete')">
                     Delete
                   </button>
                 </div>
-                <div v-show="!inviteInput && !deleteInput" v-if="admin && superadmin && !currentUser.admin && !currentUser.superadmin && !currentUser.pending" class="column has-text-left is-quarter has-text-centered">
-                  <button class="button is-rounded is-primary" @click="inviteInput = true;">
+                <div v-show="!inviteInput" v-if="admin && superadmin && !currentUser.admin && !currentUser.superadmin && !currentUser.pending" class="column has-text-left is-quarter has-text-centered">
+                  <button class="button is-rounded is-netflix-red" @click="inviteInput = true;">
                     Invite as Admin
                   </button>
                 </div>
-                <div v-show="!inviteInput && !deleteInput" v-if="admin && superadmin && currentUser.admin && !currentUser.superadmin && !currentUser.pending" class="column has-text-left is-quarter has-text-centered">
-                  <button class="button is-rounded is-primary" @click="inviteInput = true;">
+                <div v-show="!inviteInput" v-if="admin && superadmin && currentUser.admin && !currentUser.superadmin && !currentUser.pending" class="column has-text-left is-quarter has-text-centered">
+                  <button class="button is-rounded is-netflix-red" @click="inviteInput = true;">
                     Invite as Superadmin
                   </button>
                 </div>
-                <div v-show="!inviteInput && !deleteInput" v-if="admin && superadmin && !currentUser.admin && !currentUser.superadmin && currentUser.pending" class="column has-text-left is-quarter has-text-centered">
-                  <button class="button is-rounded is-primary" @click="gotoPage('/', 'register')">
+                <div v-show="!inviteInput" v-if="admin && superadmin && !currentUser.admin && !currentUser.superadmin && currentUser.pending" class="column has-text-left is-quarter has-text-centered">
+                  <button class="button is-rounded is-netflix-red" @click="gotoPage('/', 'register')">
                     Grant Admin
                   </button>
                 </div>
-                <div v-show="!inviteInput && !deleteInput" v-if="admin && superadmin && currentUser.admin && !currentUser.superadmin && currentUser.pending" class="column has-text-left is-quarter has-text-centered">
-                  <button class="button is-rounded is-primary" @click="gotoPage('/', 'register')">
+                <div v-show="!inviteInput" v-if="admin && superadmin && currentUser.admin && !currentUser.superadmin && currentUser.pending" class="column has-text-left is-quarter has-text-centered">
+                  <button class="button is-rounded is-netflix-red" @click="gotoPage('/', 'register')">
                     Grant Superadmin
                   </button>
                 </div>
@@ -104,36 +104,12 @@
                       </div>
                     </div>
                     <div class="column has-text-right is-half">
-                      <button class="button is-rounded is-primary" @click="handleInvite(currentUser)">
+                      <button class="button is-rounded is-netflix-red" @click="handleInvite(currentUser)">
                         Invite
                       </button>
                     </div>
                     <div class="column has-text-left is-half" @click="inviteInput = false;errorMessage = false;">
-                      <button class="button is-rounded is-success" >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                </div>
-                <div v-if="deleteInput" class="column is-full">
-                  <div class="columns is-mobile is-multiline is-centered">
-                    <div class="column is-full">
-                      <div class="field">
-                        <p class="control has-icons-left">
-                          <input class="input is-rounded is-danger" @keyup.enter="handleUpgradeDelete(currentUser, 'delete')" id="deletePassword" type="password" placeholder="Enter Your Admin Password" v-model="deletePassword">
-                          <span class="icon is-small is-left">
-                            <i class="fas fa-lock"></i>
-                          </span>
-                        </p>
-                      </div>
-                    </div>
-                    <div class="column has-text-right is-half">
-                      <button class="button is-rounded is-danger"  @click="handleUpgradeDelete(currentUser, 'delete')">
-                        Delete
-                      </button>
-                    </div>
-                    <div class="column has-text-left is-half" @click="deleteInput = false;errorMessage = false;">
-                      <button class="button is-rounded is-success" >
+                      <button class="button is-rounded is-netflix-red" >
                         Cancel
                       </button>
                     </div>
@@ -165,7 +141,7 @@
                 <th class="has-text-white is-hidden-mobile is-hidden-touch" >{{ user.email.slice(0,30) }}</th>
                 <th class="has-text-white is-hidden-mobile is-hidden-touch" >{{ user.role }}</th>
                 <th class="has-text-white" >
-                  <button class="button is-danger is-rounded" @click="userModal(user)">
+                  <button class="button is-netflix-red is-rounded" @click="userModal(user)">
                     View
                   </button>
                 </th>
@@ -185,6 +161,7 @@ import {
   initializeUser,
   getgds,
 } from "@utils/localUtils";
+import { apiRoutes, backendHeaders } from "@/utils/backendUtils";
 import Loading from 'vue-loading-overlay';
 export default {
   components: {
@@ -210,15 +187,13 @@ export default {
       users: [],
       gds: [],
       currgd: {},
-      deletePassword: "",
       errorMessage: false,
       successMessage: false,
-      inviteAdmin: window.apiRoutes.inviteAdmin,
-      inviteSuperAdmin:  window.apiRoutes.inviteSuperAdmin,
-      deleteUser: window.apiRoutes.deleteUser,
-      deleteAdmin: window.apiRoutes.deleteAdmin,
+      inviteAdmin: apiRoutes.inviteAdmin,
+      inviteSuperAdmin:  apiRoutes.inviteSuperAdmin,
+      deleteUser: apiRoutes.deleteUser,
+      deleteAdmin: apiRoutes.deleteAdmin,
       inviteInput: false,
-      deleteInput: false,
       inviteApi: "",
       inviteMessage: "",
       resultmessage: "",
@@ -238,9 +213,9 @@ export default {
       this.metatitle = "Refreshing...";
       this.loading = true;
       if(this.apiurl.length > 0){
-        this.$http.post(this.apiurl, {
+        this.$backend.post(this.apiurl, {
             email: this.user.email,
-        }).then(response => {
+        }, backendHeaders(this.token.token)).then(response => {
           if(response.data.auth && response.data.registered){
             this.loading = false;
             this.metatitle = "Success...";
@@ -254,7 +229,6 @@ export default {
       }
     },
     gotoPage(url, cmd) {
-      this.$ga.event({eventCategory: "Page Navigation",eventAction: url+" - "+this.siteName,eventLabel: "Manage Users"})
       if(cmd){
         this.$router.push({ path: '/'+ this.currgd.id + ':' + cmd + url })
       } else {
@@ -272,11 +246,10 @@ export default {
           route = this.deleteAdmin;
         }
       }
-      this.$http.post(route, {
+      this.$backend.post(route, {
             email: user.email,
-            adminpass: this.deletePassword,
             adminuseremail: this.user.email,
-      }).then(response => {
+      }, backendHeaders(this.token.token)).then(response => {
         if(action == "delete"){
           if(response.data.auth && response.data.registered && response.data.deleted){
             this.usermodal = false;
@@ -285,8 +258,6 @@ export default {
             this.errorMessage = false;
             this.successMessage = false;
             this.inviteInput = false;
-            this.deleteInput = false;
-            this.deletePassword = "";
             this.loading = false;
             this.handleRefresh();
           } else {
@@ -309,23 +280,21 @@ export default {
         route = this.inviteSuperAdmin;
       }
       if(user.role == "Admin" || user.role == "User" && this.inviteMessage.length >0){
-        this.$http.post(route, {
+        this.$backend.post(route, {
               email: user.email,
               message: this.inviteMessage,
               adminuseremail: this.user.email,
-        }).then(response => {
+        }, backendHeaders(this.token.token)).then(response => {
           if(response.data.auth && response.data.registered){
             this.successMessage = true;
             this.metatitle = "Invite Sent...";
             this.errorMessage = false;
-            this.$ga.event({eventCategory: "Invite",eventAction: "Success"+" - "+this.siteName,eventLabel: "Manage Users"})
             this.resultmessage = response.data.message;
             this.loading = false;
           } else {
             this.successMessage = false;
             this.errorMessage = true;
             this.metatitle = "Invite Failed...";
-            this.$ga.event({eventCategory: "Invite",eventAction: "Failed"+" - "+this.siteName,eventLabel: "Manage Users"})
             this.resultmessage = response.data.message;
             this.loading = false;
           }
@@ -342,16 +311,15 @@ export default {
       this.metatitle = "Handling the Changes...";
       let route = "";
       if(user.role == "User"){
-        route = window.apiRoutes.getPendingAdmins;
+        route = apiRoutes.getPendingAdmins;
       } else if(user.role == "Admin"){
-        route = window.apiRoutes.getPendingSuperAdmins;
+        route = apiRoutes.getPendingSuperAdmins;
       }
-      console.log(route);
       if(user.role == "User" || user.role == "Admin"){
         this.loading = true;
-        this.$http.post(route, {
+        this.$backend.post(route, {
               adminuseremail: this.user.email,
-        }).then(response => {
+        }, backendHeaders(this.token.token)).then(response => {
           if(response){
             console.log(response);
             if(response.data.auth && response.data.registered){
@@ -390,8 +358,6 @@ export default {
       this.errorMessage = false;
       this.successMessage = false;
       this.inviteInput = false;
-      this.deleteInput = false;
-      this.deletePassword = "";
     }
   },
   beforeMount() {
@@ -399,12 +365,10 @@ export default {
     var userData = initializeUser();
     if(userData.isThere){
       if(userData.type == "hybrid"){
-        this.$ga.event({eventCategory: "User Initialized",eventAction: "Hybrid - "+this.siteName,eventLabel: "Manage Users",nonInteraction: true})
         this.user = userData.data.user;
         this.logged = userData.data.logged;
         this.loading = userData.data.loading;
       } else if(userData.type == "normal"){
-        this.$ga.event({eventCategory: "User Initialized",eventAction: "Normal - "+this.siteName,eventLabel: "Manage Users",nonInteraction: true})
         this.user = userData.data.user;
         this.token = userData.data.token;
         this.logged = userData.data.logged;
@@ -427,10 +391,10 @@ export default {
   mounted() {
     if(this.admin && this.superadmin){
       this.loading = false;
-      this.apiurl = window.apiRoutes.getAll;
+      this.apiurl = apiRoutes.getAll;
     } else if(this.admin && !this.superadmin) {
       this.loading = false;
-      this.apiurl = window.apiRoutes.getUsers;
+      this.apiurl = apiRoutes.getUsers;
     } else {
       this.$router.push({ name: 'results', params: { id: this.currgd.id, cmd: "result", data: "UnAuthorized Route.", redirectUrl: "/", tocmd: 'home' } })
     }
@@ -439,11 +403,6 @@ export default {
     let gddata = getgds(this.$route.params.id);
     this.gds = gddata.gds;
     this.currgd = gddata.current;
-    this.$ga.page({
-      page: this.$route.path,
-      title: "Manage Users"+" - "+this.siteName,
-      location: window.location.href
-    });
   },
   watch: {
     searchEmail: function(){

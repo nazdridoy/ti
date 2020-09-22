@@ -43,7 +43,7 @@
                 </span>
               </p>
             </div>
-            <button :class=" loading ? 'button is-rounded is-loading is-danger is-medium' : 'button is-rounded is-medium is-danger'" :disabled="disabled">
+            <button :class=" loading ? 'button is-rounded is-loading is-netflix-red is-medium' : 'button is-rounded is-medium is-netflix-red'" :disabled="disabled">
               <span class="icon is-medium">
                 <i class="fas fa-shipping-fast"></i>
               </span>
@@ -55,6 +55,7 @@
     </div>
 </template>
 <script>
+import { apiRoutes, backendHeaders } from "@/utils/backendUtils";
 import { initializeUser, getgds } from "@utils/localUtils";
 import { removeItem } from "@utils/encryptUtils";
 import Loading from 'vue-loading-overlay';
@@ -97,11 +98,11 @@ import 'vue-loading-overlay/dist/vue-loading.css';
                 this.loading = true;
                 e.preventDefault();
                 if (this.confirmpassword === this.newpassword && this.newpassword.length > 0) {
-                    this.$http.post(window.apiRoutes.changePasswordRoute, {
+                    this.$backend.post(apiRoutes.changePasswordRoute, {
                         email: this.user.email,
                         oldpassword: this.oldpassword,
                         newpassword: this.newpassword,
-                    })
+                    }, backendHeaders(this.token.token))
                     .then(response => {
                       if(response.data.auth && response.data.registered && response.data.changed){
                         removeItem("tokendata");
@@ -109,13 +110,11 @@ import 'vue-loading-overlay/dist/vue-loading.css';
                         this.loading = false;
                         this.metatitle = "Success...";
                         this.$bus.$emit("logout", "User Logged Out");
-                        this.$ga.event({eventCategory: "Password Change",eventAction: "Success"+" - "+this.siteName,eventLabel: "Change Password"});
                         this.$router.push({ name: 'results', params: { id: this.currgd.id, cmd: "result", success: true, redirectUrl: '/', tocmd: 'login', data: `response.data.message. You have to Relogin with new Password` } })
                       } else {
                         this.errorMessage = true
                         this.loading = false;
                         this.metatitle = "Failed...";
-                        this.$ga.event({eventCategory: "Password Change",eventAction: "Fail"+" - "+this.siteName,eventLabel: "Change Password"});
                         this.resultmessage = response.data.message;
                       }
                     });
@@ -156,11 +155,9 @@ import 'vue-loading-overlay/dist/vue-loading.css';
           var userData = initializeUser();
           if(userData.isThere){
             if(userData.type == "hybrid"){
-              this.$ga.event({eventCategory: "User Initialized",eventAction: "Hybrid - "+this.siteName,eventLabel: "Change Password",nonInteraction: true})
               this.user = userData.data.user;
               this.loading = userData.data.loading;
             } else if(userData.type == "normal"){
-              this.$ga.event({eventCategory: "User Initialized",eventAction: "Normal - "+this.siteName,eventLabel: "Change Password",nonInteraction: true})
               this.user = userData.data.user;
               this.loading = userData.data.loading;
             }
@@ -172,11 +169,6 @@ import 'vue-loading-overlay/dist/vue-loading.css';
           let gddata = getgds(this.$route.params.id);
           this.gds = gddata.gds;
           this.currgd = gddata.current;
-          this.$ga.page({
-            page: this.$route.path,
-            title: "Change Password"+" - "+this.siteName,
-            location: window.location.href
-          });
         },
         watch: {
           oldpassword: "validateData",

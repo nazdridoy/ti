@@ -1,5 +1,5 @@
 <template>
-  <nav class="navbar" role="navigation" aria-label="main navigation" :style=" netflix_black ? 'background-color: #222222' : 'background-color: black;'">
+  <nav class="navbar" role="navigation" aria-label="main navigation">
     <div class="container">
       <div class="loading">
         <loading :active.sync="loading" :can-cancel="false" :is-full-page="fullpage"></loading>
@@ -12,8 +12,7 @@
         </div>
         <a
           role="button"
-          style="color: #e50914;"
-          :class="'navbar-burger burger ' + (isActive ? 'navbar-active' : '')"
+          :class="'navbar-burger burger accent' + (isActive ? 'navbar-active' : '')"
           aria-label="menu"
           aria-expanded="false"
           data-target="navbarBasicExample"
@@ -58,11 +57,11 @@
             class="navbar-item"
             v-show="logged"
             v-for="(link, index) in quicklinks.slice(0,3)"
-            v-tooltip.bottom-start="link.displayname"
+            v-tooltip.bottom-start="link.title"
             v-bind:key="index"
             @click="gotoPage('/'+ link.link + '/')"
            >
-          <span>{{ link.displayname }}</span>
+          <span>{{ link.title }}</span>
           </a>
           <a
             class="navbar-item"
@@ -76,7 +75,7 @@
           <div
             :class="ismobile ? gddropdown ? 'navbar-item has-dropdown is-active' : 'navbar-item has-dropdown' : 'navbar-item has-dropdown is-hoverable' "
            @click="ismobile ? gddropdown = !gddropdown : '' " v-if="!logged">
-            <a class="navbar-link" style="background-color: inherit;">Space</a>
+            <a class="navbar-link" style="background-color: inherit;">Spaces</a>
             <div class="navbar-dropdown is-boxed">
               <a
                 class="navbar-item"
@@ -93,7 +92,7 @@
           <div
             :class="ismobile ? gddropdown ? 'navbar-item has-dropdown is-active' : 'navbar-item has-dropdown' : 'navbar-item has-dropdown is-hoverable' "
            @click="ismobile ? gddropdown = !gddropdown : '' " v-if="logged">
-            <a class="navbar-link" style="background-color: inherit;">Space</a>
+            <a class="navbar-link" style="background-color: inherit;">Spaces</a>
             <div class="navbar-dropdown is-boxed">
               <a
                 class="navbar-item"
@@ -195,6 +194,7 @@
 </template>
 
 <script>
+import { apiRoutes, backendHeaders } from "@/utils/backendUtils";
 import { getItem, removeItem } from '@utils/encryptUtils';
 import { initializeUser } from "@utils/localUtils";
 import ViewMode from "@/layout/viewmode";
@@ -220,14 +220,8 @@ export default {
         this.miniplayer = true;
       }
     })
-    this.$bus.$on('td', () => {
-      this.quicklinks = window.quickLinks.filter((links) => {
-        return links.root == this.gdindex
-      })[0].link;
-    })
     this.loginorout();
     this.active = false;
-    this.$ga.event({eventCategory: "Site Initialized",eventAction: "Normal - "+this.siteTitle,eventLabel: "Navbar",nonInteraction: true})
     this.siteName = document.getElementsByTagName("title")[0].innerText;
     if (window.gds && window.gds.length > 0) {
       this.gds = window.gds.map((item, index) => {
@@ -277,18 +271,18 @@ export default {
       if (this.gds && this.gds.length >= index) {
         this.currgd = this.gds[index];
         this.gdindex = this.gds[index].index;
+        this.getallPosts(this.$route.params.id);
       }
     },
     changeItem(item) {
-      this.$ga.event({eventCategory: "TD Change",eventAction: "Normal - "+this.siteName,eventLabel: "Navbar",nonInteraction: true})
-      this.$bus.$emit("td", "TD Changed");
       this.currgd = item;
       this.$router.push({
         path: '/'+item.index+':home/',
       });
+      this.getallPosts(item.index);
+      this.$bus.$emit("td", "TD Changed");
     },
     query() {
-      this.$ga.event({eventCategory: "Query",eventAction: "Normal - "+this.siteName,eventLabel: "Navbar",nonInteraction: true})
       if (this.param) {
         this.isActive = !this.isActive;
         this.$router.push({
@@ -302,18 +296,32 @@ export default {
     hoverclick() {
       this.active = !this.active
     },
+    getallPosts(id){
+      this.loading = true;
+      this.$backend.post(apiRoutes.getallPosters, {
+        email: this.user.email,
+        root: id
+      }, backendHeaders(this.token.token)).then(response => {
+        if(response.data.auth && response.data.registered){
+          let resp = response.data;
+          this.quicklinks = resp.quicklink;
+          this.loading = false;
+        } else {
+          this.quicklinks = [];
+          this.loading = false;
+        }
+      })
+    },
     loginorout() {
       this.loading = true;
       var userData = initializeUser();
       if(userData.isThere){
         if(userData.type == "hybrid"){
           this.user = userData.data.user;
-          this.$ga.event({eventCategory: "User Initialized",eventAction: "Hybrid",eventLabel: "Navigator",nonInteraction: true})
           this.logged = userData.data.logged;
           this.loading = userData.data.loading;
         } else if(userData.type == "normal"){
           this.user = userData.data.user;
-          this.$ga.event({eventCategory: "User Initialized",eventAction: "Normal",eventLabel: "Navigator",nonInteraction: true})
           this.token = userData.data.token;
           this.logged = userData.data.logged;
           this.loading = userData.data.loading;
@@ -324,12 +332,12 @@ export default {
         this.logged = userData.data.logged;
         this.loading = userData.data.loading;
       }
+      this.getallPosts(this.$route.params.id);
     },
     homeroute() {
       this.$router.push({ path: '/'+ this.gdindex + ':' + 'home/' })
     },
     gotoPage(url, cmd) {
-      this.$ga.event({eventCategory: "Page Navigation",eventAction: url+" - "+this.currgd.name,eventLabel: "Navigator"})
       this.isActive = !this.isActive;
       this.loading = true;
       if(cmd){
@@ -346,19 +354,19 @@ export default {
       this.isActive = !this.isActive;
       var token = getItem("tokendata")
       var user = getItem("userdata");
+      var session = getItem("sessiondata");
       var hyBridToken = getItem("hybridToken");
       if(hyBridToken && hyBridToken != null || hyBridToken != undefined){
         removeItem("hybridToken");
         this.$bus.$emit("logout", "User Logged Out");
         this.loading = false;
-        this.$ga.event({eventCategory: "User Logout",eventAction: "Hybrid"+" - "+this.currgd.name,eventLabel: "Navigator"})
         this.$router.push({ name: 'results' , params: { id: this.gdindex, cmd: "result", success:true, data: "You are Being Logged Out. Please Wait", redirectUrl: '/', tocmd:'home' } })
-      } else if (user != null && token != null){
+      } else if (user != null && token != null && session != null){
         removeItem("tokendata");
         removeItem("userdata");
+        removeItem("sessiondata");
         this.$bus.$emit("logout", "User Logged Out");
         this.loading = false;
-        this.$ga.event({eventCategory: "User Logout",eventAction: "Normal"+" - "+this.currgd.name,eventLabel: "Navigator"})
         this.$router.push({ name: 'results' , params: { id: this.gdindex, cmd: "result", success:true, data: "You are Being Logged Out. Please Wait", redirectUrl: '/', tocmd:'home' } })
       } else {
         this.loading = false;
@@ -400,15 +408,11 @@ export default {
   },
   mounted() {
     this.netflix_black = window.themeOptions.prefer_netflix_black
-    this.quicklinks = window.quickLinks.filter((links) => {
-      return links.root == this.gdindex
-    })[0].link;
     this.changeNavbarStyle();
   },
   watch: {
     "$route.params.id": "chooseGD",
     "$route": function() {
-      this.$ga.event({eventCategory: "Route Change",eventAction: "Normal - "+this.siteName,eventLabel: "Navbar",nonInteraction: true})
       if(this.$route.name == 'home' && !this.logged){
         this.navbarStyle = "transparent";
         this.backgroundClass = "home-back";
@@ -416,7 +420,7 @@ export default {
         this.navbarStyle = "black";
         this.backgroundClass = "none";
       }
-    }
+    },
   },
 };
 </script>

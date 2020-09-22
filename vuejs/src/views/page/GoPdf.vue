@@ -4,31 +4,24 @@
       <loading :active.sync="mainLoad" :can-cancel="false" :is-full-page="fullpage"></loading>
     </div>
     <div class="columns is-desktop is-multiline is-centered is-vcentered mx-0 px-0">
-      <div class="column has-text-white is-full has-text-centered mx-0 px-0">
-        {{currentPage}} / {{pageCount}}
-      </div>
-      <div class="column is-half has-text-centered mx-0 px-0">
-        <div class="columns is-mobile is-centered is-vcentered">
-          <div class="column is-half">
-            <button class="button is-netflix-red is-rounded" @click="previousPage">
-              Previous
-            </button>
-          </div>
-          <div class="column is-half">
-            <button class="button is-netflix-red is-rounded" @click="nextPage">
-              Next Page
-            </button>
-          </div>
-        </div>
+      <div class="column is-full has-text-right">
+        <button class="button is-netflix-red is-rounded" @click="download">
+          <span class="icon">
+            <i class="fas fa-download fontonly"></i>
+          </span>
+        </button>
       </div>
       <div class="column is-full mx-0 px-0">
         <div class="columns is-desktop is-multiline is-centered is-vcentered mx-0 px-0">
-          <div class="column is-half mx-0 px-0" >
+          <div v-for="i in numPages" v-bind:key="i" class="column is-half mx-0 my-1 py-1 px-0" >
+            <p class="is-small has-text-centered has-text-white mx-0 my-1 py-0 px-0">
+              Page No. <span class="has-text-netflix-only">{{ i }}</span>
+            </p>
             <pdf
-                :src="mediaUrl"
-                :page="page"
-                @num-pages="pageCount = $event"
-                @page-loaded="currentPage = $event"
+              ref="pdf"
+              :src="src"
+              :page="i"
+              class="mx-1 my-2"
             ></pdf>
           </div>
         </div>
@@ -38,6 +31,7 @@
 </template>
 
 <script>
+import { apiRoutes, backendHeaders } from "@/utils/backendUtils";
 import { initializeUser, getgds } from "@utils/localUtils";
 import pdf from "vue-pdf-modified/src/vuePdfNoSssNoWorker";
 import Loading from 'vue-loading-overlay';
@@ -57,6 +51,7 @@ export default {
   },
   data: function() {
     return {
+      show: true,
       user: {},
       token: {},
       mediaUrl: "",
@@ -69,9 +64,11 @@ export default {
       windowWidth: window.innerWidth,
       screenWidth: screen.width,
       ismobile: false,
-      currentPage: 0,
-      pageCount: 0,
+      src:'',
+      loadedRatio: 0,
       page: 1,
+      numPages: 0,
+      rotate: 0,
     };
   },
   components: {
@@ -102,14 +99,13 @@ export default {
       }
     },
     getUrl(){
-      this.mediaUrl = window.location.origin + encodeURI(this.url)+"?player=internal"+"&email="+this.user.email+"&token="+this.token.token;
+      this.src = window.location.origin + encodeURI(this.url)+"?player=internal"+"&email="+this.user.email+"&token="+this.token.token;
       this.metatitle = decodeURIComponent(this.url.split('/').pop().split('.').slice(0,-1).join('.'));
+      pdf.createLoadingTask(this.src).promise.then(pdf => {
+        this.numPages = pdf.numPages;
+      })
     },
     previousPage() {
-      if(this.$audio.player() == undefined){
-        this.$audio.createPlayer();
-      }
-      this.$audio.destroy();
       if(this.page == 1){
         this.page = 1;
       } else {
@@ -117,19 +113,15 @@ export default {
       }
     },
     nextPage() {
-      if(this.$audio.player() == undefined){
-        this.$audio.createPlayer();
-      }
-      this.$audio.player().list.add({
-        name: "summas",
-        url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-        cover: window.themeOptions.audio.default_poster
-      });
       if(this.page >= this.pageCount){
         this.page = this.currentPage
       } else {
         this.page++;
       }
+    },
+    download(){
+      location.href = this.src;
+      return;
     }
   },
   async beforeMount() {
@@ -139,10 +131,8 @@ export default {
     if(userData.isThere){
       if(userData.type == "hybrid"){
         this.user = userData.data.user;
-        this.$ga.event({eventCategory: "User Initialized",eventAction: "Hybrid - "+this.siteName,eventLabel: "PDF",nonInteraction: true})
         this.logged = userData.data.logged;
       } else if(userData.type == "normal"){
-        this.$ga.event({eventCategory: "User Initialized",eventAction: "Normal - "+this.siteName,eventLabel: "PDF",nonInteraction: true})
         this.user = userData.data.user;
         this.token = userData.data.token;
         this.logged = userData.data.logged;
@@ -150,10 +140,10 @@ export default {
     } else {
       this.logged = userData.data.logged;
     }
-    await this.$http.post(window.apiRoutes.mediaTokenTransmitter, {
+    await this.$backend.post(apiRoutes.mediaTokenTransmitter, {
       email: userData.data.user.email,
       token: userData.data.token.token,
-    }).then(response => {
+    }, backendHeaders(userData.data.token.token)).then(response => {
       if(response.data.auth && response.data.registered && response.data.token){
         this.mainLoad = false;
         this.mediaToken = response.data.token;
@@ -172,11 +162,6 @@ export default {
     let gddata = getgds(this.$route.params.id);
     this.gds = gddata.gds;
     this.currgd = gddata.current;
-    this.$ga.page({
-      page: "/PDF/"+this.url.split('/').pop()+"/",
-      title: decodeURIComponent(this.url.split('/').pop().split('.').slice(0,-1).join('.'))+" - "+this.siteName,
-      location: window.location.href
-    });
   },
   watch: {
     screenWidth: function() {

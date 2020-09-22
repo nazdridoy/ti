@@ -1,14 +1,14 @@
 <template>
   <div>
     <nav
-      class="breadcrumb level g2-breadcrumb is-hidden-mobile is-hidden-touch"
+      class="breadcrumb level g2-breadcrumb is-hidden-mobile"
       aria-label="breadcrumbs"
     >
       <div class="level-left">
         <div class="level-item">
           <ul>
             <li>
-              <a style="color: #e50914"
+              <a style="accent"
                 v-show="navs && navs.length > 0"
                 @click="go('/' + index + ':/')"
                 >{{ $t("index") }}</a
@@ -19,10 +19,10 @@
               :class="index + 1 == navs.length ? 'is-active' : ''"
               v-bind:key="index"
             >
-              <a style="color: #80bdab;" class="breadcrumb-text" v-if="index + 1 == navs.length" aria-current="page" href="#">{{
+              <a class="breadcrumb-text" v-if="index + 1 == navs.length" aria-current="page" href="#">{{
                 item.title
               }}</a>
-              <a style="color: #e50914;" v-else @click="go(item.path)">{{ item.title }}</a>
+              <a class="accent" v-else @click="go(item.path)">{{ item.title }}</a>
             </li>
           </ul>
         </div>

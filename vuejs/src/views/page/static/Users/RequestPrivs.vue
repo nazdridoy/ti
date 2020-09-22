@@ -90,7 +90,7 @@
                   </div>
                 </div>
               </div>
-              <button :class=" loading ? 'button is-loading is-rounded is-warning is-medium' : 'button is-warning is-rounded is-medium' " type="submit" :disabled="disabled" >
+              <button :class=" loading ? 'button is-loading is-rounded is-netflix-red is-medium' : 'button is-netflix-red is-rounded is-medium' " type="submit" :disabled="disabled" >
                 <span class="icon">
                   <i class="fas fa-user-plus"></i>
                 </span>
@@ -162,7 +162,7 @@
                       <p class="subtitle has-text-white">For Admin Features</p>
                     </div>
                     <div v-if="!admin && !superadmin" class="column is-one-third">
-                      <button class="button is-white is-rounded" @click="adminmodal = true">
+                      <button class="button is-netflix-red is-rounded" @click="adminmodal = true">
                         <span class="icon is-small">
                           <i class="fas fa-sticky-note"></i>
                         </span>
@@ -173,7 +173,7 @@
                       <p class="subtitle has-text-white">For Superadmin Features</p>
                     </div>
                     <div v-if="admin && !superadmin" class="column is-one-third">
-                      <button class="button is-white is-rounded" @click="superadminmodal = true">
+                      <button class="button is-netflix-red is-rounded" @click="superadminmodal = true">
                         <span class="icon is-small">
                           <i class="fas fa-sticky-note"></i>
                         </span>
@@ -193,6 +193,7 @@ import {
   initializeUser,
   getgds,
 } from "@utils/localUtils";
+import { apiRoutes, backendHeaders } from "@/utils/backendUtils";
 import Loading from 'vue-loading-overlay';
 import 'vue-loading-overlay/dist/vue-loading.css';
     export default {
@@ -241,25 +242,23 @@ import 'vue-loading-overlay/dist/vue-loading.css';
               this.loading = true;
                 e.preventDefault()
                 if(this.checked && this.codechecked){
-                  this.$http.post(this.apiurl, {
+                  this.$backend.post(this.apiurl, {
                         name: this.user.name,
                         email: this.user.email,
                         message: this.message,
-                  })
+                  }, backendHeaders(this.token.token))
                   .then(response => {
                       if(response){
                         if(response.data.auth && response.data.registered){
                           this.successMessage = true;
                           this.errorMessage = false;
                           this.metatitle = "Request Sent...";
-                          this.$ga.event({eventCategory: "Previlege Request",eventAction: "Success"+" - "+this.siteName,eventLabel: "Request Previleges"})
                           this.loading = false;
                           this.resultmessage = response.data.message
                         } else {
                           this.successMessage = false;
                           this.errorMessage = true;
                           this.metatitle = "Request Failed...";
-                          this.$ga.event({eventCategory: "Previlege Request",eventAction: "Failed"+" - "+this.siteName,eventLabel: "Request Previleges"})
                           this.loading = false;
                           this.resultmessage = response.data.message
                         }
@@ -301,7 +300,7 @@ import 'vue-loading-overlay/dist/vue-loading.css';
         },
         beforeMount() {
           this.loading = true;
-          this.$http.post(window.apiRoutes.getSiteSettings).then(response => {
+          this.$backend.post(apiRoutes.getSiteSettings).then(response => {
             if(response.data.auth && response.data.registered){
               if(response.data.data.adminRequests){
                 this.loading = false;
@@ -336,10 +335,10 @@ import 'vue-loading-overlay/dist/vue-loading.css';
         mounted(){
           this.loading = true;
           if(!this.admin && !this.superadmin){
-            this.apiurl = window.apiRoutes.requestadminroute;
+            this.apiurl = apiRoutes.requestadminroute;
             this.role = 'admin', this.loading = false;
           } else if(this.admin && !this.superadmin) {
-            this.apiurl = window.apiRoutes.requestsuperadminroute;
+            this.apiurl = apiRoutes.requestsuperadminroute;
             this.role = "superadmin", this.loading = false;
           } else {
             this.loading = false;
@@ -350,11 +349,6 @@ import 'vue-loading-overlay/dist/vue-loading.css';
           let gddata = getgds(this.$route.params.id);
           this.gds = gddata.gds;
           this.currgd = gddata.current;
-          this.$ga.page({
-            page: this.$route.path,
-            title: "Previleges Request"+" - "+this.siteName,
-            location: window.location.href
-          });
         },
         watch: {
           role: "validateData",

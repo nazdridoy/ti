@@ -19,6 +19,7 @@
 </template>
 
 <script>
+import { apiRoutes, backendHeaders } from "@/utils/backendUtils";
 import { initializeUser, getgds } from "@utils/localUtils";
 import { decode64, checkExtends } from "@utils/AcrouUtil";
 import Loading from 'vue-loading-overlay';
@@ -92,21 +93,21 @@ export default {
       }
     },
     downloadButton() {
-      this.$ga.event({eventCategory: "Other File Download",eventAction: "Download - "+this.siteName,eventLabel: "Others",nonInteraction: true})
       window.open(this.obj);
     }
   },
   async beforeMount() {
     this.checkMobile();
+    let gddata = getgds(this.$route.params.id);
+    this.gds = gddata.gds;
+    this.currgd = gddata.current;
     this.mainload = true;
     var userData = await initializeUser();
     if(userData.isThere){
       if(userData.type == "hybrid"){
         this.user = userData.data.user;
-        this.$ga.event({eventCategory: "User Initialized",eventAction: "Hybrid - "+this.siteName,eventLabel: "Others",nonInteraction: true})
         this.logged = userData.data.logged;
       } else if(userData.type == "normal"){
-        this.$ga.event({eventCategory: "User Initialized",eventAction: "Normal - "+this.siteName,eventLabel: "Others",nonInteraction: true})
         this.user = userData.data.user;
         this.token = userData.data.token;
         this.logged = userData.data.logged;
@@ -114,10 +115,10 @@ export default {
     } else {
       this.logged = userData.data.logged;
     }
-    await this.$http.post(window.apiRoutes.mediaTokenTransmitter, {
+    await this.$backend.post(apiRoutes.mediaTokenTransmitter, {
       email: userData.data.user.email,
       token: userData.data.token.token,
-    }).then(response => {
+    }, backendHeaders(userData.data.token.token)).then(response => {
       if(response.data.auth && response.data.registered && response.data.token){
         this.mainLoad = false;
         this.mediaToken = response.data.token;
@@ -133,16 +134,6 @@ export default {
       this.mainLoad = false;
       this.mediaToken = "";
     })
-  },
-  created() {
-    let gddata = getgds(this.$route.params.id);
-    this.gds = gddata.gds;
-    this.currgd = gddata.current;
-    this.$ga.page({
-      page: "/Others/"+this.url.split('/').pop()+"/",
-      title: this.url.split('/').pop().split('.').slice(0,-1).join('.')+" - "+this.siteName,
-      location: window.location.href
-    });
   },
   watch: {
     screenWidth: function() {

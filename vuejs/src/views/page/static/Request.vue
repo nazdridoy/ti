@@ -83,7 +83,7 @@
                 </div>
               </div>
             </div>
-            <button :class=" loading ? 'button is-loading is-rounded is-warning is-medium' : 'button is-warning is-rounded is-medium' " type="submit" :disabled="disabled" >
+            <button :class=" loading ? 'button is-loading is-rounded is-netflix-red is-medium' : 'button is-netflix-red is-rounded is-medium' " type="submit" :disabled="disabled" >
               <span class="icon">
                 <i class="fas fa-user-plus"></i>
               </span>
@@ -120,6 +120,7 @@
     </div>
 </template>
 <script>
+import { apiRoutes } from "@/utils/backendUtils";
 import { getgds } from "@utils/localUtils";
 import Loading from 'vue-loading-overlay';
 import 'vue-loading-overlay/dist/vue-loading.css';
@@ -170,8 +171,8 @@ import 'vue-loading-overlay/dist/vue-loading.css';
                 e.preventDefault()
                 if(this.checked){
                   if(this.codechecked){
-                    let url = window.apiRoutes.requestRoute
-                    this.$http.post(url, {
+                    let url = apiRoutes.requestRoute
+                    this.$backend.post(url, {
                           name: this.name,
                           email: this.email,
                           drives: this.drive,
@@ -184,14 +185,12 @@ import 'vue-loading-overlay/dist/vue-loading.css';
                             this.errormessageVisibility = false;
                             this.loading = false;
                             this.metatitle = "Success Requesting...";
-                            this.$ga.event({eventCategory: "User Request",eventAction: "Success - "+" - "+this.siteName,eventLabel: "Request Access"})
                             this.resultmessage = response.data.message
                           } else {
                             this.successmessageVisibility = false;
                             this.errormessageVisibility = true;
                             this.loading = false;
                             this.metatitle = "Request Failed...";
-                            this.$ga.event({eventCategory: "User Request",eventAction: "Failed - "+" - "+this.siteName,eventLabel: "Request Access"})
                             this.resultmessage = response.data.message
                           }
                         }
@@ -245,7 +244,7 @@ import 'vue-loading-overlay/dist/vue-loading.css';
         },
         beforeMount(){
           this.loading = true;
-          this.$http.post(window.apiRoutes.getSiteSettings).then(response => {
+          this.$backend.post(apiRoutes.getSiteSettings).then(response => {
             if(response.data.auth && response.data.registered){
               if(response.data.data.requests){
                 this.loading = false;
@@ -266,11 +265,6 @@ import 'vue-loading-overlay/dist/vue-loading.css';
           let gddata = getgds(this.$route.params.id);
           this.gds = gddata.gds;
           this.currgd = gddata.current;
-          this.$ga.page({
-            page: this.$route.path,
-            title: "Request Access"+" - "+this.siteName,
-            location: window.location.href
-          });
         },
         watch: {
           name: "validateData",

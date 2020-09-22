@@ -2,6 +2,9 @@ import Vue from "vue";
 import febAlive from "feb-alive";
 import VueRouter from "vue-router";
 import axios from "axios";
+import NProgress from "nprogress";
+import "nprogress/nprogress.css";
+import { apiRoutes } from "@/utils/backendUtils";
 import { decodeSecret, getItem, setItem, removeItem } from '@utils/encryptUtils';
 // Routing data
 
@@ -46,11 +49,14 @@ Vue.use(febAlive, { router });
  * ASD
  */
 router.beforeEach( (to, from, next) => {
+  NProgress.start();
+  setItem("prev", from.name);
   store.dispatch("acrou/cancelToken/cancel")
   const token = getItem("tokendata");
   const user = getItem("userdata");
   const hyBridToken = getItem("hybridToken");
   const sessionStore = getItem("sessionStore");
+  const session = getItem("sessiondata");
   if(to.matched.some(record => record.meta.redirect)){
     next({path:'/0:home/'})
   }
@@ -67,9 +73,10 @@ router.beforeEach( (to, from, next) => {
         removeItem("hybridToken");
         next({ name: 'results', params: { id: to.params.id, cmd: "results", nextUrl: to.fullPath, data: "Not Authorized" } });
       }
-    } else if(token != null && user != null){
+    } else if(token != null && user != null && session != null){
       const tokenData = JSON.parse(decodeSecret(token));
       const userData = JSON.parse(decodeSecret(user));
+      const sessionData = JSON.parse(decodeSecret(session));
       if(sessionStore != undefined && sessionStore != null) {
         if(to.matched.some(record => record.meta.admin)){
           if(userData.admin){
@@ -90,17 +97,20 @@ router.beforeEach( (to, from, next) => {
           next({ params: { userinfo: userData, tokeninfo: tokenData } });
         }
       } else {
-        axios.post(window.apiRoutes.verifyRoute, {
+        axios.post(apiRoutes.verifyRoute, {
           email: userData.email,
-          token: tokenData.token
+          token: tokenData.token,
+          sessionId: sessionData.sessionid,
         }).then(response => {
           if(!response.data.auth && !response.data.registered && response.data.tokenuser == null){
             removeItem("tokendata");
             removeItem("userdata");
+            removeItem("sessiondata");
             next({ name: 'results', params: { id: to.params.id, cmd: "results", nextUrl: 'home/', data: "Your Token Got Expired. Login to Generate Another Token. You will be Redirected to Login Page Automatically." } });
           } else if(!response.data.auth && !response.data.registered && !response.data.tokenuser){
             removeItem("tokendata");
             removeItem("userdata");
+            removeItem("sessiondata");
             next({ name: 'results', params: { id: to.params.id, cmd: "results", nextUrl: to.fullPath, data: "User Not Found." } });
           } else {
             setItem('sessionStore', Date.now());
@@ -131,6 +141,7 @@ router.beforeEach( (to, from, next) => {
     } else {
       removeItem("tokendata");
       removeItem("userdata");
+      removeItem("sessiondata");
       next({ name: 'results', params: { id: to.params.id, cmd: "result", success: false, nextUrl: to.fullPath, data: "You are Not Logged in to View Content. Please Login to Continue", redirectUrl: '/', tocmd: 'login' } });
     }
   } else if(to.matched.some(record => record.meta.guest)) {
@@ -140,8 +151,9 @@ router.beforeEach( (to, from, next) => {
       else{
         const tokenData = JSON.parse(decodeSecret(token));
         const userData = JSON.parse(decodeSecret(user));
+        const sessionData = JSON.parse(decodeSecret(session));
         if(to.matched.some(record => record.meta.allow)){
-            next({ params: { userinfo: userData, tokeninfo: tokenData } });
+            next({ params: { userinfo: userData, tokeninfo: tokenData, sessioninfo: sessionData } });
         } else {
             next({name: 'home', params: { id: to.params.id, cmd: 'home/' }});
         }
@@ -149,6 +161,10 @@ router.beforeEach( (to, from, next) => {
   }else {
       next()
   }
+});
+
+router.afterEach(() => {
+  NProgress.done();
 });
 
 export default router;

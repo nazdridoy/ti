@@ -27,7 +27,7 @@
                   </div>
                 </div>
                 <div class="buttons is-centered">
-                  <button class="button is-rounded is-medium is-danger" @click="gotoPage('/', 'login')">
+                  <button class="button is-rounded is-medium is-netflix-red" @click="gotoPage('/', 'login')">
                     <span class="icon is-medium">
                       <i class="fas fa-shipping-fast"></i>
                     </span>
@@ -98,7 +98,7 @@
                   </span>
                 </p>
               </div>
-              <button :class=" loading ? 'button is-rounded is-loading is-success is-medium' : 'button is-rounded is-success is-medium' " :disabled="disabled">
+              <button :class=" loading ? 'button is-rounded is-loading is-netflix-red is-medium' : 'button is-rounded is-netflix-red is-medium' " :disabled="disabled">
                 <span class="icon is-medium">
                   <i class="fas fa-user-check"></i>
                 </span>
@@ -110,6 +110,7 @@
     </div>
 </template>
 <script>
+import { apiRoutes } from "@/utils/backendUtils";
 import { getgds } from "@utils/localUtils";
 import Loading from 'vue-loading-overlay';
 import 'vue-loading-overlay/dist/vue-loading.css';
@@ -155,7 +156,7 @@ import 'vue-loading-overlay/dist/vue-loading.css';
               this.loading = true;
                 e.preventDefault();
                 if (this.confirmpassword === this.password && this.password.length > 0) {
-                    this.$http.post(window.apiRoutes.otpRegister, {
+                    this.$backend.post(apiRoutes.otpRegister, {
                         email: this.email,
                         otp: this.otp,
                         newpassword: this.password,
@@ -166,14 +167,12 @@ import 'vue-loading-overlay/dist/vue-loading.css';
                           this.successmessageVisibility = true;
                           this.loading = false;
                           this.metatitle = "Success Verifying";
-                          this.$ga.event({eventCategory: "User Verification",eventAction: "User Registered - "+" - "+this.siteName,eventLabel: "OTP Register"})
                           this.resultmessage = response.data.message + "Now You can Login with Your Email and Password";
                         } else {
                           this.errormessageVisibility = true;
                           this.successmessageVisibility = false;
                           this.loading = false;
                           this.metatitle = "Failed Verifying";
-                          this.$ga.event({eventCategory: "User Verification",eventAction: "Failed - "+" - "+this.siteName,eventLabel: "OTP Register"})
                           this.resultmessage = response.data.message;
                       }
                     });
@@ -187,7 +186,6 @@ import 'vue-loading-overlay/dist/vue-loading.css';
                 }
             },
             gotoPage(url, cmd) {
-              this.$ga.event({eventCategory: "Page Navigation",eventAction: url+" - "+this.siteName,eventLabel: "OTP Register"})
               if(cmd){
                 this.$router.push({ path: '/'+ this.currgd.id + ':' + cmd + url })
               } else {
@@ -229,11 +227,6 @@ import 'vue-loading-overlay/dist/vue-loading.css';
           let gddata = getgds(this.$route.params.id);
           this.gds = gddata.gds;
           this.currgd = gddata.current;
-          this.$ga.page({
-            page: this.$route.path,
-            title: "OTP Register"+" - "+this.siteName,
-            location: window.location.href
-          });
         },
         watch: {
           otp: "validateData",

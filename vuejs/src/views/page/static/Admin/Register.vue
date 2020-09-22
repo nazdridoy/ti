@@ -6,44 +6,6 @@
       <div class="columns is-vcentered is-centered is-multiline">
         <div class="column is-half">
           <div class="columns is-desktop is-multiline is-centered">
-            <div class="column is-full">
-              <div class="box has-background-primary">
-                <p class="title has-text-weight-bold has-text-white has-text-centered">Currently Logged as</p>
-                <p class="subtitle has-text-weight-bold has-text-white has-text-centered">Scroll Down to Accept Users</p>
-                <div class="columns is-vcentered is-multiline is-mobile">
-                  <div class="column is-three-fifths">
-                    <p class="subtitle has-text-black">Admin Name</p>
-                  </div>
-                  <div class="column is-two-fifths">
-                    <p class="subtitle has-text-black has-text-weight-bold">{{ user.name }}</p>
-                  </div>
-                  <div class="column is-three-fifths">
-                    <p class="subtitle has-text-black">Currently You are</p>
-                  </div>
-                  <div class="column is-two-fifths">
-                    <p class="subtitle has-text-black has-text-weight-bold">{{ user.role }}</p>
-                  </div>
-                  <div v-if="user.admin && !user.superadmin" class="column is-full">
-                    <p class="subtitle has-text-weight-bold has-text-warning-dark">
-                      Your Scope is Restricted to Adding Additional Users. Use the Below Button to get Pending User Requests.
-                    </p>
-                  </div>
-                  <div v-if="user.admin && !user.superadmin" class="column has-text-centered is-full">
-                    <button class="button is-white" @click="gotoPage('/request/', 'settings')">
-                      <span class="icon is-small">
-                        <i class="fas fa-user-shield"></i>
-                      </span>
-                      <span>Request</span>
-                    </button>
-                  </div>
-                  <div v-if="user.admin && user.superadmin" class="column is-full">
-                    <p class="subtitle has-text-weight-bold has-text-danger-dark">
-                      Your Scope is Maximum and Can Add Additional Users, Promote Users.Use the Below Buttons to get Pending User Requests.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
             <div :class=" modal ? 'modal is-active' : 'modal' ">
               <div class="modal-background"></div>
               <div class="modal-card">
@@ -61,10 +23,10 @@
                     <div class="column is-6">
                       <p class="subtitle has-text-black">{{ user.email }}</p>
                     </div>
-                    <div v-if="admin && superadmin" class="column is-6 has-text-right">
+                    <div class="column is-6 has-text-right">
                       <button class="button is-netflix-red is-rounded" @click="handleUserActions(user.email)">{{ action[user.email] ? "Close" : "Actions" }}</button>
                     </div>
-                    <div v-show="admin && superadmin && action[user.email]" class="column has-text-centered is-full">
+                    <div v-show="action[user.email]" class="column has-text-centered is-full">
                       <div class="box has-background-light">
                         <div class="columns is-mobile is-multiline is-centered">
                           <div :class="ismobile ? 'column is-half' : 'column is-one-third'">
@@ -101,7 +63,7 @@
                         </p>
                       </div>
                       <div class="column is-one-third">
-                        <button class="button is-success" @click="modal = true; listname = 'Users - Pending';getPendingUsers(pendingusers); setrole = 'user';deleteApi = 'user'">
+                        <button class="button is-netflix-red" @click="modal = true; listname = 'Users - Pending';getPendingUsers(pendingusers); setrole = 'user';deleteApi = 'user'">
                           <span class="icon is-small">
                             <i class="fas fa-user-shield"></i>
                           </span>
@@ -114,7 +76,7 @@
                         </p>
                       </div>
                       <div v-if="user.admin && user.superadmin" class="column is-one-third">
-                        <button class="button is-success" @click="modal = true; listname = 'Admins - Pending';getPendingUsers(pendingadmin); setrole = 'admin';deleteApi = 'admin'">
+                        <button class="button is-netflix-red" @click="modal = true; listname = 'Admins - Pending';getPendingUsers(pendingadmin); setrole = 'admin';deleteApi = 'admin'">
                           <span class="icon is-small">
                             <i class="fas fa-user-shield"></i>
                           </span>
@@ -127,7 +89,7 @@
                         </p>
                       </div>
                       <div v-if="user.admin && user.superadmin" class="column is-one-third">
-                        <button class="button is-success" @click="modal = true; listname = 'Admins - Pending';getPendingUsers(pendingsuperadmin); setrole = 'superadmin';deleteApi = 'superadmin';">
+                        <button class="button is-netflix-red" @click="modal = true; listname = 'Admins - Pending';getPendingUsers(pendingsuperadmin); setrole = 'superadmin';deleteApi = 'superadmin';">
                           <span class="icon is-small">
                             <i class="fas fa-user-shield"></i>
                           </span>
@@ -142,23 +104,6 @@
           </div>
         </div>
         <div class="column is centered has-text-centered has-text-white is-two-fifths">
-          <article :class=" warnmessageVisibility ? 'message is-warning' : 'message is-hidden is-warning'">
-            <div class="message-header">
-              <p>Important</p>
-              <button class="delete" @click="warnmessageVisibility = false" aria-label="delete"></button>
-            </div>
-            <div class="message-body">
-              <span>Only Pending User and Admin Requests can be Accepted.Use Invite Option to Invite Users.</span>
-              <div class="buttons is-centered mt-2">
-                <button class="button is-rounded is-danger" @click="gotoPage('/', 'invite')">
-                  <span class="icon is-small">
-                    <i class="fas fa-user-plus"></i>
-                  </span>
-                  <span>Invite</span>
-                </button>
-              </div>
-            </div>
-          </article>
           <article :class=" errorMessage ? 'message is-danger' : 'message is-hidden is-danger'">
             <div class="message-header">
               <p>Error Proccessing</p>
@@ -220,42 +165,14 @@
                 <label for="superadminradio">Superadmin</label>
             </div>
             <p v-if="admin && !superadmin" class="help is-warning">Only Superadmin can Accept Admin & Superadmin users</p>
-            <div class="field">
-              <p class="control has-icons-left">
-                <input class="input is-rounded" id="password" type="password" placeholder="Your Admin Password" v-model="password" required autofocus>
-                <span class="icon is-small is-left">
-                  <i class="fas fa-lock"></i>
-                </span>
-              </p>
-            </div>
-            <div class="field">
-              <div class="control">
-                <div class="b-checkbox is-warning is-circular is-inline">
-                  <input class="styled has-text-success" type="checkbox" id="terms" name="terms" v-model="checked">
-                  <label for="terms">
-                    <span class="content has-text-white">  I Accept and Read the <a class="has-text-warning" href="https://raw.githubusercontent.com/tks18/gindex-v4/dark-mode-0-1/CONTRIBUTING.md" target="_blank">Community Guidelines</a></span>
-                  </label>
-                </div>
-              </div>
-            </div>
-            <div class="field">
-              <div class="control">
-                <div class="b-checkbox is-warning is-circular is-inline">
-                  <input class="styled has-text-success" type="checkbox" id="code" name="terms" v-model="codechecked">
-                  <label for="code">
-                    <span class="content has-text-white">  I Accept and Read the <a class="has-text-warning" href="https://github.com/tks18/gindex-v4/blob/dark-mode-0-1/CODE_OF_CONDUCT.md" target="_blank">Code of Conduct</a></span>
-                  </label>
-                </div>
-              </div>
-            </div>
             <div>
-            <button :class=" loading ? 'button is-loading is-rounded is-warning' : 'button is-warning is-rounded' " type="submit" :disabled="disabled">
+            <button :class=" loading ? 'button is-loading is-rounded is-netflix-red' : 'button is-netflix-red is-rounded' " type="submit" :disabled="disabled">
               <span class="icon">
                 <i class="fas fa-user-plus"></i>
               </span>
               <span>Add User</span>
             </button>
-            <a class="ml-3 button is-rounded is-white" @click="name = ''; email = ''; password = ''; message = ''; role = ''; checked = false; codechecked = false;">
+            <a class="ml-3 button is-rounded is-white" @click="name = ''; email = ''; message = ''; role = '';">
               <span class="icon">
                 <i class="fas fa-sync"></i>
               </span>
@@ -272,6 +189,7 @@ import {
   initializeUser,
   getgds,
 } from "@utils/localUtils";
+import { apiRoutes, backendHeaders } from "@/utils/backendUtils";
 import Loading from 'vue-loading-overlay';
 import 'vue-loading-overlay/dist/vue-loading.css';
 export default {
@@ -305,7 +223,6 @@ export default {
                 adminmessage: "",
                 disabled: true,
                 deleteApi: "",
-                password : "",
                 apiurl: "",
                 role: "",
                 setrole: "",
@@ -317,15 +234,13 @@ export default {
                 modal: false,
                 resultmessage: "",
                 message: "",
-                checked: false,
-                codechecked: false,
                 pendingMessage: "",
                 columnVisibility: false,
                 loading: false,
                 fullpage: true,
-                pendingadmin: window.apiRoutes.getPendingAdmins,
-                pendingsuperadmin: window.apiRoutes.getPendingSuperAdmins,
-                pendingusers: window.apiRoutes.getPendingUsers,
+                pendingadmin: apiRoutes.getPendingAdmins,
+                pendingsuperadmin: apiRoutes.getPendingSuperAdmins,
+                pendingusers: apiRoutes.getPendingUsers,
                 pendingUserList: [],
                 listname: "",
             }
@@ -335,14 +250,13 @@ export default {
               this.metatitle = "Registering the User...";
               this.loading = true;
                 e.preventDefault()
-                if (this.name.length > 0 && this.email.length > 0 && this.password && this.password.length > 0 && this.checked && this.role.length > 0 && this.codechecked)
+                if (this.name.length > 0 && this.email.length > 0 && this.role.length > 0)
                 {
-                  this.$http.post(this.apiurl, {
+                  this.$backend.post(this.apiurl, {
                         name: this.name,
                         email: this.email,
-                        adminpass: this.password,
                         adminuseremail: this.user.email,
-                  })
+                  }, backendHeaders(this.token.token))
                   .then(response => {
                       if(response){
                         if(response.data.auth && response.data.registered){
@@ -350,14 +264,12 @@ export default {
                           this.successMessage = true;
                           this.errorMessage = false;
                           this.metatitle = "Success...";
-                          this.$ga.event({eventCategory: "Add User",eventAction: "Success"+" - "+this.siteName,eventLabel: "Register"})
                           this.resultmessage = response.data.message
                         } else {
                           this.loading = false;
                           this.successMessage = false;
                           this.errorMessage = true;
                           this.metatitle = "Failed...";
-                          this.$ga.event({eventCategory: "Add User",eventAction: "Failed"+" - "+this.siteName,eventLabel: "Register"})
                           this.resultmessage = response.data.message
                         }
                       }
@@ -370,7 +282,6 @@ export default {
                     this.successMessage = false;
                     this.errorMessage = true;
                     this.resultmessage = "Fill in the Form Properly"
-                    this.password = "";
                 }
             },
             handleTransport(user, role){
@@ -384,9 +295,9 @@ export default {
               this.metatitle = "Getting Pending List";
               this.modal = true;
               this.loading = true;
-              this.$http.post(route, {
+              this.$backend.post(route, {
                     adminuseremail: this.user.email,
-              }).then(response => {
+              }, backendHeaders(this.token.token)).then(response => {
                 if(response){
                   if(response.data.auth && response.data.registered){
                     this.loading = false;
@@ -406,7 +317,6 @@ export default {
               })
             },
             gotoPage(url, cmd) {
-              this.$ga.event({eventCategory: "Page Navigation",eventAction: url+" - "+this.siteName,eventLabel: "Register"})
               if(cmd){
                 this.$router.push({ path: '/'+ this.currgd.id + ':' + cmd + url })
               } else {
@@ -414,7 +324,7 @@ export default {
               }
             },
             validateData() {
-              if(this.name.length > 0 && this.email.length > 0 && this.password && this.password.length > 0 && this.checked && this.role.length > 0 && this.codechecked && this.password.length > 0){
+              if(this.name.length > 0 && this.email.length > 0 && this.role.length > 0){
                 this.disabled = false;
               } else {
                 this.disabled = true;
@@ -432,19 +342,17 @@ export default {
             async handleSpam(post, user) {
               this.loading = true;
               this.metatitle = "Adding Spammers...";
-              await this.$http.post(window.apiRoutes.quickaddSpam, {
+              await this.$backend.post(apiRoutes.quickaddSpam, {
                 email: user.email,
                 adminuseremail: this.user.email
-              }).then(response => {
+              }, backendHeaders(this.token.token)).then(response => {
                 if(response){
                   if(response.data.auth && response.data.registered){
                     this.handleDelete(post, user);
                     this.metatitle = "Adding Spammers...";
-                    this.$ga.event({eventCategory: "Add Spam",eventAction: "Success"+" - "+this.siteName,eventLabel: "Register"})
                   } else {
                     this.metatitle = "Failed to Add";
                     this.loading = false;
-                    this.$ga.event({eventCategory: "Add Spam",eventAction: "Failed"+" - "+this.siteName,eventLabel: "Register"})
                   }
                 }
               })
@@ -455,29 +363,27 @@ export default {
               let route = "";
               let reloadRoute = "";
               if(post == "user"){
-                route = window.apiRoutes.deletePendingUsers;
+                route = apiRoutes.deletePendingUsers;
                 reloadRoute = this.pendingusers;
               } else if(post == "admin"){
-                route = window.apiRoutes.deletePendingAdmins;
+                route = apiRoutes.deletePendingAdmins;
                 reloadRoute = this.pendingadmin;
               } else if(post == "superadmin"){
                 reloadRoute = this.pendingsuperadmin;
-                route = window.apiRoutes.deletePendingSuperAdmins;
+                route = apiRoutes.deletePendingSuperAdmins;
               }
-              this.$http.post(route, {
+              this.$backend.post(route, {
                 email: user.email,
                 adminuseremail: this.user.email
-              }).then(response => {
+              }, backendHeaders(this.token.token)).then(response => {
                 if(response){
                   if(response.data.auth && response.data.removed){
                     this.pendingUserList = [];
                     this.metatitle = "Removed";
-                    this.$ga.event({eventCategory: "Delete",eventAction: "Success"+" - "+this.siteName,eventLabel: "Register"})
                     this.getPendingUsers(reloadRoute);
                     this.loading = false;
                   } else {
                     this.metatitle = "Failed to Remove";
-                    this.$ga.event({eventCategory: "Delete",eventAction: "Failed"+" - "+this.siteName,eventLabel: "Register"})
                     this.loading = false;
                     this.modal = true;
                   }
@@ -507,12 +413,10 @@ export default {
           var userData = initializeUser();
           if(userData.isThere){
             if(userData.type == "hybrid"){
-              this.$ga.event({eventCategory: "User Initialized",eventAction: "Hybrid - "+this.siteName,eventLabel: "Register",nonInteraction: true})
               this.user = userData.data.user;
               this.logged = userData.data.logged;
               this.loading = userData.data.loading;
             } else if(userData.type == "normal"){
-              this.$ga.event({eventCategory: "User Initialized",eventAction: "Normal - "+this.siteName,eventLabel: "Register",nonInteraction: true})
               this.user = userData.data.user;
               this.token = userData.data.token;
               this.logged = userData.data.logged;
@@ -529,34 +433,26 @@ export default {
           let gddata = getgds(this.$route.params.id);
           this.gds = gddata.gds;
           this.currgd = gddata.current;
-          this.$ga.page({
-            page: this.$route.path,
-            title: "Add/Promote Users"+" - "+this.siteName,
-            location: window.location.href
-          });
         },
         watch: {
           role: function() {
             if(this.role == "admin"){
               this.namedisabled = true;
               this.validateData();
-              this.apiurl = window.apiRoutes.upgradeAdmin
+              this.apiurl = apiRoutes.upgradeAdmin
             } else if(this.role == "superadmin"){
               this.namedisabled = true;
               this.validateData();
-              this.apiurl = window.apiRoutes.upgradeSuperAdmin
+              this.apiurl = apiRoutes.upgradeSuperAdmin
             } else {
               this.namedisabled = false;
               this.validateData();
-              this.apiurl = window.apiRoutes.registerRoute
+              this.apiurl = apiRoutes.registerRoute
             }
           },
           name: "validateData",
           email: "validateData",
           message: "validateData",
-          password: "validateData",
-          checked: "validateData",
-          codechecked: "validateData"
         },
     }
 </script>

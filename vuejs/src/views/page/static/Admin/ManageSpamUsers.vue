@@ -58,15 +58,7 @@
               <textarea class="textarea is-success is-rounded" placeholder="Reason for Adding Him" id="message" rows="3" v-model="addmessage" required></textarea>
             </div>
           </div>
-          <div class="field">
-            <p class="control has-icons-left">
-              <input class="input is-rounded" id="addpassword" type="password" placeholder="Password" v-model="addpassword" required>
-              <span class="icon is-small is-left">
-                <i class="fas fa-lock"></i>
-              </span>
-            </p>
-          </div>
-          <button :class=" loading ? 'button is-rounded is-loading is-danger is-medium' : 'button is-rounded is-medium is-danger'">
+          <button :class=" loading ? 'button is-rounded is-loading is-netflix-red is-medium' : 'button is-rounded is-medium is-netflix-red'">
             <span class="icon is-medium">
               <i class="fas fa-user-minus"></i>
             </span>
@@ -96,15 +88,7 @@
               </div>
             </div>
           </div>
-          <div class="field">
-            <p class="control has-icons-left">
-              <input class="input is-rounded" id="removepassword" type="password" placeholder="Password" v-model="removepassword" required>
-              <span class="icon is-small is-left">
-                <i class="fas fa-lock"></i>
-              </span>
-            </p>
-          </div>
-          <button :class=" loading ? 'button is-rounded is-loading is-danger is-medium' : 'button is-rounded is-medium is-danger'">
+          <button :class=" loading ? 'button is-rounded is-loading is-netflix-red is-medium' : 'button is-rounded is-medium is-netflix-red'">
             <span class="icon is-medium">
               <i class="fas fa-user-plus"></i>
             </span>
@@ -120,6 +104,7 @@ import {
   initializeUser,
   getgds,
 } from "@utils/localUtils";
+import { apiRoutes, backendHeaders } from "@/utils/backendUtils";
 import Loading from 'vue-loading-overlay';
 export default {
   components: {
@@ -146,11 +131,9 @@ export default {
       roledisabled: true,
       loading: false,
       addrole: "",
-      addpassword: "",
       addmessage: "",
       removerole: "",
       removeUserEmail: "",
-      removepassword: "",
       users: [],
       spamUsers: [],
       getUserApi: "",
@@ -172,9 +155,9 @@ export default {
       this.metatitle = "Getting Users...";
       this.loading = true;
       if(this.getUserApi.length > 0){
-        this.$http.post(this.getUserApi, {
+        this.$backend.post(this.getUserApi, {
           email: this.user.email
-        }).then(response => {
+        }, backendHeaders(this.token.token)).then(response => {
           if(response.data.auth && response.data.registered){
             this.loading = false;
             this.metatitle = "Got Users...";
@@ -195,9 +178,9 @@ export default {
       this.metatitle = "Getting Spammers...";
       this.loading = true;
       if(this.getUserApi.length > 0){
-        this.$http.post(this.getSpamApi, {
+        this.$backend.post(this.getSpamApi, {
           adminuseremail: this.user.email
-        }).then(response => {
+        }, backendHeaders(this.token.token)).then(response => {
           if(response.data.auth && response.data.registered){
             this.loading = false;
             this.metatitle = "Done...";
@@ -217,25 +200,22 @@ export default {
     handleAddSpam() {
       this.metatitle = "Adding Spammers...";
       this.loading = true;
-      if(this.addUserEmail.length > 0 && this.addpassword.length > 0){
-        this.$http.post(this.postAddSpam, {
+      if(this.addUserEmail.length > 0){
+        this.$backend.post(this.postAddSpam, {
           email: this.addUserEmail,
           message: this.addmessage,
           adminuseremail: this.user.email,
-          adminpass: this.addpassword,
-        }).then(response => {
+        }, backendHeaders(this.token.token)).then(response => {
           if(response.data.auth && response.data.registered){
             this.successmessageVisibility = true;
             this.errormessageVisibility = false;
             this.metatitle = "Success...";
-            this.$ga.event({eventCategory: "Add Spam",eventAction: "Success"+" - "+this.siteName,eventLabel: "Manage Spam"})
             this.resultmessage = response.data.message;
             this.loading = false;
           } else {
             this.successmessageVisibility = false;
             this.errormessageVisibility = true;
             this.metatitle = "Failed...";
-            this.$ga.event({eventCategory: "Add Spam",eventAction: "Failed"+" - "+this.siteName,eventLabel: "Manage Spam"})
             this.resultmessage = response.data.message;
             this.loading = false;
           }
@@ -245,24 +225,21 @@ export default {
     handleRemoveSpam() {
       this.metatitle = "Removing Spammers...";
       this.loading = true;
-      if(this.removeUserEmail.length > 0 && this.removepassword.length > 0){
-        this.$http.post(this.postSpamApi, {
+      if(this.removeUserEmail.length > 0){
+        this.$backend.post(this.postSpamApi, {
           email: this.removeUserEmail,
           adminuseremail: this.user.email,
-          password: this.removepassword
-        }).then(response => {
+        }, backendHeaders(this.token.token)).then(response => {
           if(response.data.auth && response.data.deleted){
             this.successmessageVisibility = true;
             this.errormessageVisibility = false;
             this.metatitle = "Done...";
-            this.$ga.event({eventCategory: "Remove Spam",eventAction: "Success"+" - "+this.siteName,eventLabel: "Manage Spam"})
             this.resultmessage = response.data.message;
             this.loading = false;
           } else {
             this.metatitle = "Failed...";
             this.successmessageVisibility = false;
             this.errormessageVisibility = true;
-            this.$ga.event({eventCategory: "Remove Spam",eventAction: "Failed"+" - "+this.siteName,eventLabel: "Manage Spam"})
             this.resultmessage = response.data.message;
             this.loading = false;
           }
@@ -278,12 +255,10 @@ export default {
     var userData = initializeUser();
     if(userData.isThere){
       if(userData.type == "hybrid"){
-        this.$ga.event({eventCategory: "User Initialized",eventAction: "Hybrid - "+this.siteName,eventLabel: "Manage Spam",nonInteraction: true})
         this.user = userData.data.user;
         this.logged = userData.data.logged;
         this.loading = userData.data.loading;
       } else if(userData.type == "normal"){
-        this.$ga.event({eventCategory: "User Initialized",eventAction: "Normal - "+this.siteName,eventLabel: "Manage Spam",nonInteraction: true})
         this.user = userData.data.user;
         this.token = userData.data.token;
         this.logged = userData.data.logged;
@@ -308,15 +283,15 @@ export default {
     if(this.admin && this.superadmin){
       this.addrole = "user",this.removerole = "user";
       this.roledisabled = false;
-      this.getUserApi = window.apiRoutes.getUsers,this.postAddSpam = window.apiRoutes.addSpamUser;
-      this.getSpamApi = window.apiRoutes.getSpamUsers,this.postSpamApi = window.apiRoutes.removeSpamUser;
+      this.getUserApi = apiRoutes.getUsers,this.postAddSpam = apiRoutes.addSpamUser;
+      this.getSpamApi = apiRoutes.getSpamUsers,this.postSpamApi = apiRoutes.removeSpamUser;
       this.getUsers();
       this.getSpamUsers();
       this.loading = false;
     } else if(this.admin && !this.superadmin) {
       this.addrole = "user",this.removerole = "user";
-      this.getUserApi = window.apiRoutes.getUsers,this.postAddSpam = window.apiRoutes.addSpamUser;
-      this.getSpamApi = window.apiRoutes.getSpamUsers,this.postSpamApi = window.apiRoutes.removeSpamUser;
+      this.getUserApi = apiRoutes.getUsers,this.postAddSpam = apiRoutes.addSpamUser;
+      this.getSpamApi = apiRoutes.getSpamUsers,this.postSpamApi = apiRoutes.removeSpamUser;
       this.getUsers();
       this.getSpamUsers();
       this.loading = false;
@@ -329,40 +304,35 @@ export default {
     let gddata = getgds(this.$route.params.id);
     this.gds = gddata.gds;
     this.currgd = gddata.current;
-    this.$ga.page({
-      page: this.$route.path,
-      title: "Manage Spam"+" - "+this.siteName,
-      location: window.location.href
-    });
   },
   watch: {
     addrole: function() {
       if(this.addrole == "user"){
-        this.getUserApi = window.apiRoutes.getUsers;
-        this.postAddSpam = window.apiRoutes.addSpamUser;
+        this.getUserApi = apiRoutes.getUsers;
+        this.postAddSpam = apiRoutes.addSpamUser;
         this.getUsers();
       } else if(this.addrole == "admin"){
-        this.getUserApi = window.apiRoutes.getAdmins;
-        this.postAddSpam = window.apiRoutes.addSpamAdmin;
+        this.getUserApi = apiRoutes.getAdmins;
+        this.postAddSpam = apiRoutes.addSpamAdmin;
         this.getUsers();
       } else if(this.addrole == "superadmin"){
-        this.getUserApi = window.apiRoutes.getSuperAdmins;
-        this.postAddSpam = window.apiRoutes.addSpamSuperAdmin;
+        this.getUserApi = apiRoutes.getSuperAdmins;
+        this.postAddSpam = apiRoutes.addSpamSuperAdmin;
         this.getUsers();
       }
     },
     removerole: function() {
       if(this.removerole == "user"){
-        this.getSpamApi = window.apiRoutes.getSpamUsers;
-        this.postSpamApi = window.apiRoutes.removeSpamUser;
+        this.getSpamApi = apiRoutes.getSpamUsers;
+        this.postSpamApi = apiRoutes.removeSpamUser;
         this.getSpamUsers();
       } else if(this.removerole == "admin"){
-        this.getSpamApi = window.apiRoutes.getSpamAdmins;
-        this.postSpamApi = window.apiRoutes.removeSpamAdmin;
+        this.getSpamApi = apiRoutes.getSpamAdmins;
+        this.postSpamApi = apiRoutes.removeSpamAdmin;
         this.getSpamUsers();
       } else if(this.removerole == "superadmin"){
-        this.getSpamApi = window.apiRoutes.getSpamSuperadmins;
-        this.postSpamApi = window.apiRoutes.removeSpamSuperadmin
+        this.getSpamApi = apiRoutes.getSpamSuperadmins;
+        this.postSpamApi = apiRoutes.removeSpamSuperadmin
         this.getSpamUsers();
       }
     },

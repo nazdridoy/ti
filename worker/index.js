@@ -2,17 +2,17 @@
 var authConfig = {
   siteName: "Glory to Heaven",
   hybridpass: "Copy Hybrid Password Generated from Backend",
-  version: "v8.1.3",
-  theme: "green",
+  version: "v1.0.0",
+  theme: "shamrock",
   //Following Themes are Available for Selection.
   //carnation, curious-blue, emerald, ice-cold, konifer, netflix-red, kournikova, mona-lisa, persian-rose, purple-heart, purple-mountains-majesty, salmon, selective-yellow, shamrock, witch-haze
   //All are Case Sensitive.
-  frontendUrl: "https://glorytoheaven.tk",
-  github_name: "tks18",
-  github_repo: "gindex-v4",
+  frontendUrl: "https://test.nazdridoy.workers.dev",
+  github_name: "nazdridoy",
+  github_repo: "ti",
   favicon: "https://raw.githubusercontent.com/tks18/infozy/develop/favicon.ico",
   client_id: "client_id",
-  backendSite: "http://localhost:3000",
+  backendSite: "https://mgtbn.herokuapp.com",
   client_secret: "client_id",
   refresh_token: "refresh_token",
   roots: [
